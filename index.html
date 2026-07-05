@@ -433,8 +433,8 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ CREATE — PICK GAME ═══ -->
 <div id="screen-create" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
-    <button class="nav-back" onclick="showScreen('intro')">← Back</button>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
+    <button class="nav-back" onclick="goHome()">← Back</button>
   </nav>
   <div class="inner">
     <h2 class="page-title anim-in">Pick a game</h2>
@@ -462,7 +462,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ SETTINGS — 4 IN A ROW ═══ -->
 <div id="screen-settings-four" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
     <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
   </nav>
   <div class="inner">
@@ -504,6 +504,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
             <div class="seg" id="four-opp-seg">
               <button class="seg-opt active" onclick="setSeg('four-opp-seg',this,'four-opp','ai')">vs AI</button>
               <button class="seg-opt" onclick="setSeg('four-opp-seg',this,'four-opp','local')">Pass &amp; Play</button>
+              <button class="seg-opt" onclick="setSeg('four-opp-seg',this,'four-opp','online')">Online</button>
             </div>
             <span class="hint" id="four-opp-hint">AI takes its turn automatically.</span>
           </div>
@@ -580,7 +581,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ SETTINGS — TIC TAC TOE ═══ -->
 <div id="screen-settings-ttt" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
     <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
   </nav>
   <div class="inner">
@@ -621,6 +622,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
             <div class="seg" id="ttt-opp-seg">
               <button class="seg-opt active" onclick="setSeg('ttt-opp-seg',this,'ttt-opp','ai')">vs AI</button>
               <button class="seg-opt" onclick="setSeg('ttt-opp-seg',this,'ttt-opp','local')">Pass &amp; Play</button>
+              <button class="seg-opt" onclick="setSeg('ttt-opp-seg',this,'ttt-opp','online')">Online</button>
             </div>
             <span class="hint" id="ttt-opp-hint">AI takes its turn automatically.</span>
           </div>
@@ -693,7 +695,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ SETTINGS — HANGMAN ═══ -->
 <div id="screen-settings-hangman" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
     <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
   </nav>
   <div class="inner">
@@ -731,6 +733,14 @@ canvas#wheelCanvas{border-radius:50%;display:block}
               <button class="p-btn" id="hm-p-inc" onclick="hmChangeP(1)">+</button>
             </div>
             <span class="hint">One sets the word, the rest guess together.</span>
+          </div>
+          <div class="field">
+            <label>Mode</label>
+            <div class="seg" id="hm-mode-seg">
+              <button class="seg-opt active" onclick="setSeg('hm-mode-seg',this,'hm-mode','local')">Pass &amp; Play</button>
+              <button class="seg-opt" onclick="setSeg('hm-mode-seg',this,'hm-mode','online')">Online</button>
+            </div>
+            <span class="hint" id="hm-mode-hint">Everyone guesses from this one device.</span>
           </div>
         </div>
       </div>
@@ -796,7 +806,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ HANGMAN — SET WORD ═══ -->
 <div id="screen-hangman-setword" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
     <button class="nav-back" onclick="showScreen('settings-hangman')">← Settings</button>
   </nav>
   <div class="inner" style="max-width:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center">
@@ -821,22 +831,43 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ JOIN ═══ -->
 <div id="screen-join" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
-    <button class="nav-back" onclick="showScreen('intro')">← Back</button>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
+    <button class="nav-back" onclick="goHome()">← Back</button>
   </nav>
   <div class="inner">
     <h2 class="page-title anim-in">Join a game</h2>
     <p class="page-sub anim-in" style="animation-delay:.07s">Jump into an open room or enter a private code.</p>
     <p class="section-label anim-in" style="animation-delay:.12s">Open rooms</p>
-    <div class="rooms-list anim-in" style="animation-delay:.17s">
-      <div class="room-card"><div><p class="room-name">Jelle's room</p><div class="room-meta"><span>4 in a Row</span><span>1 / 2 players</span></div></div><div class="room-right"><div class="dot dot-green"></div><button class="join-pill">Join</button></div></div>
-      <div class="room-card"><div><p class="room-name">Word night</p><div class="room-meta"><span>Hangman · Animals</span><span>1 / 3 players</span></div></div><div class="room-right"><div class="dot dot-green"></div><button class="join-pill">Join</button></div></div>
-      <div class="room-card"><div><p class="room-name">Quick match</p><div class="room-meta"><span>Tic Tac Toe</span><span>1 / 2 players</span></div></div><div class="room-right"><div class="dot dot-yellow"></div><button class="join-pill">Join</button></div></div>
+    <div class="rooms-list anim-in" style="animation-delay:.17s" id="rooms-list">
+      <p class="hint">Looking for open rooms…</p>
     </div>
     <div class="divider anim-in" style="animation-delay:.24s">or join with a code</div>
     <div class="code-row anim-in" style="animation-delay:.3s">
       <input class="code-input" id="code-in" maxlength="6" placeholder="Enter 6-letter code…"/>
-      <button class="btn-join-code">Join room</button>
+      <button class="btn-join-code" onclick="joinByCode()">Join room</button>
+    </div>
+    <p class="hint" id="join-error" style="color:var(--accent2);margin-top:10px"></p>
+  </div>
+</div>
+
+<!-- ═══ WAITING ROOM ═══ -->
+<div id="screen-waiting" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
+    <button class="nav-back" onclick="cancelWaiting()">← Cancel</button>
+  </nav>
+  <div class="inner" style="max-width:480px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center">
+    <div style="font-size:44px;margin-bottom:14px" id="waiting-icon">⏳</div>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:8px" id="waiting-title">Waiting for a friend…</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:28px" id="waiting-sub">Share this code — the game starts as soon as they join.</p>
+    <div class="settings-block" style="width:100%;padding:22px">
+      <div class="code-display">
+        <span class="code-val" id="waiting-code">——————</span>
+        <button class="copy-btn" onclick="copyCode('waiting-code')">Copy</button>
+      </div>
+    </div>
+    <div style="margin-top:22px;display:flex;gap:10px;width:100%" id="waiting-actions">
+      <button class="btn-cancel" style="flex:1" onclick="cancelWaiting()">Cancel</button>
     </div>
   </div>
 </div>
@@ -844,7 +875,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ GAME ═══ -->
 <div id="screen-game" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
     <span id="game-nav-center" style="font-family:var(--mono);font-size:12px;color:var(--muted)"></span>
     <button class="nav-back" onclick="confirmQuit()">Quit</button>
   </nav>
@@ -863,6 +894,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
     <div class="timer-bar-wrap" id="timer-bar-wrap" style="display:none">
       <div class="timer-bar" id="timer-bar"></div>
     </div>
+    <p id="online-banner" style="display:none;text-align:center;font-size:12px;color:var(--yellow);margin-bottom:14px"></p>
     <div id="game-board-container" style="display:flex;justify-content:center;align-items:flex-start;flex:1;padding-top:8px"></div>
   </div>
 </div>
@@ -875,7 +907,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
     <p class="result-sub" id="result-sub">Well played.</p>
     <div class="result-btns">
       <button class="btn-cancel" onclick="rematch()">Play again</button>
-      <button class="btn-create" onclick="showScreen('intro')">Main menu</button>
+      <button class="btn-create" onclick="backToMenuFromResult()">Main menu</button>
     </div>
   </div>
 </div>
@@ -883,8 +915,8 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ TOOLS HUB ═══ -->
 <div id="screen-tools" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
-    <button class="nav-back" onclick="showScreen('intro')">← Back</button>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
+    <button class="nav-back" onclick="goHome()">← Back</button>
   </nav>
   <div class="inner">
     <h2 class="page-title anim-in">Tools</h2>
@@ -919,7 +951,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 <!-- ═══ SPIN THE WHEEL ═══ -->
 <div id="screen-wheel" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
     <button class="nav-back" onclick="showScreen('tools')">← Back to tools</button>
   </nav>
   <div class="inner" style="max-width:960px">
@@ -991,8 +1023,157 @@ const cfg = {
   'ttt-first': '1', 'ttt-time': '0',
   'ttt-sym1': '✕', 'ttt-sym2': '○',
   'hm-source': 'random', 'hm-category': 'random', 'hm-maxwrong': '6',
-  'hm-rounds': '1'
+  'hm-rounds': '1', 'hm-mode': 'local'
 };
+
+// ═══════════════════════════════════════════
+//  ONLINE / NETWORKING (Firestore)
+// ═══════════════════════════════════════════
+const firebaseConfig = {apiKey:"AIzaSyBhJcLbM8mUqiULgmHUPZwr7so5n3pca8s",authDomain:"flashcard-maker-61023.firebaseapp.com",projectId:"flashcard-maker-61023",storageBucket:"flashcard-maker-61023.firebasestorage.app",messagingSenderId:"880797755117",appId:"1:880797755117:web:d5201d3a4caa8e8ae90ee4"};
+
+let _fbCache = null;
+async function fb() {
+  if (_fbCache) return _fbCache;
+  const { initializeApp } = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js');
+  const fs = await import('https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js');
+  const app = initializeApp(firebaseConfig);
+  _fbCache = { db: fs.getFirestore(app), ...fs };
+  return _fbCache;
+}
+
+const NET = {
+  code: null, seat: null, game: null, isHost: false,
+  unsubRoom: null, unsubLobby: null, heartbeatInt: null,
+  presenceInt: null, room: null, onRemote: null
+};
+
+function netMaxSeats(game) {
+  return game === 'hangman' ? (typeof hmPlayerCount !== 'undefined' ? hmPlayerCount : 2) : 2;
+}
+
+function netPersist() {
+  if (NET.code && NET.seat) {
+    sessionStorage.setItem('aycp-room', JSON.stringify({ code: NET.code, seat: NET.seat, game: NET.game }));
+  } else {
+    sessionStorage.removeItem('aycp-room');
+  }
+}
+
+async function netCreateRoom(game, roomName, isPrivate, settings, initialState) {
+  const { db, doc, setDoc, serverTimestamp } = await fb();
+  const code = genCode();
+  const room = {
+    code, game, roomName: roomName || 'Game room', private: !!isPrivate,
+    status: 'waiting', createdAt: serverTimestamp(),
+    settings: settings || {}, maxSeats: netMaxSeats(game),
+    players: { p1: { lastSeen: Date.now() } },
+    state: initialState || {}
+  };
+  await setDoc(doc(db, 'rooms', code), room);
+  NET.code = code; NET.seat = 1; NET.game = game; NET.isHost = true;
+  netPersist();
+  return code;
+}
+
+async function netJoinRoom(code) {
+  code = (code || '').trim().toUpperCase();
+  if (!code) throw new Error('empty');
+  const { db, doc, runTransaction } = await fb();
+  const ref = doc(db, 'rooms', code);
+  let seat = null, result = null;
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error('not-found');
+    const data = snap.data();
+    if (data.status === 'finished') throw new Error('finished');
+    const max = data.maxSeats || 2;
+    const players = { ...(data.players || {}) };
+    let openSeat = null;
+    for (let s = 1; s <= max; s++) if (!players['p' + s]) { openSeat = s; break; }
+    if (!openSeat) throw new Error('full');
+    players['p' + openSeat] = { lastSeen: Date.now() };
+    const update = { players };
+    if (Object.keys(players).length >= 2) update.status = 'active';
+    tx.update(ref, update);
+    seat = openSeat;
+    result = { ...data, ...update };
+  });
+  NET.code = code; NET.seat = seat; NET.game = result.game; NET.isHost = (seat === 1);
+  netPersist();
+  return result;
+}
+
+function netListenRoom(code, onUpdate) {
+  if (NET.unsubRoom) { NET.unsubRoom(); NET.unsubRoom = null; }
+  NET.onRemote = onUpdate;
+  fb().then(({ db, doc, onSnapshot }) => {
+    NET.unsubRoom = onSnapshot(doc(db, 'rooms', code), (snap) => {
+      const room = snap.exists() ? { id: snap.id, ...snap.data() } : null;
+      NET.room = room;
+      if (NET.onRemote) NET.onRemote(room);
+    });
+  });
+}
+
+async function netUpdateState(mutatorFn, extra) {
+  if (!NET.code) return;
+  const { db, doc, runTransaction } = await fb();
+  const ref = doc(db, 'rooms', NET.code);
+  await runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    if (!snap.exists()) return;
+    const data = snap.data();
+    const newState = mutatorFn({ ...data.state });
+    tx.update(ref, { state: newState, ...(extra || {}) });
+  });
+}
+
+async function netHeartbeat() {
+  if (!NET.code || !NET.seat) return;
+  const { db, doc, updateDoc } = await fb();
+  updateDoc(doc(db, 'rooms', NET.code), { [`players.p${NET.seat}.lastSeen`]: Date.now() }).catch(() => {});
+}
+
+function netStartHeartbeat() {
+  clearInterval(NET.heartbeatInt);
+  netHeartbeat();
+  NET.heartbeatInt = setInterval(netHeartbeat, 8000);
+}
+
+function netOpponentStale(room) {
+  if (!room || !room.players) return false;
+  const now = Date.now();
+  return Object.entries(room.players).some(([seat, p]) => {
+    if (seat === `p${NET.seat}`) return false;
+    return p && p.lastSeen && (now - p.lastSeen) > 20000;
+  });
+}
+
+async function netLeaveRoom() {
+  clearInterval(NET.heartbeatInt); NET.heartbeatInt = null;
+  clearInterval(NET.presenceInt); NET.presenceInt = null;
+  if (NET.unsubRoom) { NET.unsubRoom(); NET.unsubRoom = null; }
+  if (NET.code && NET.seat) {
+    try {
+      const { db, doc, updateDoc, deleteField } = await fb();
+      await updateDoc(doc(db, 'rooms', NET.code), { [`players.p${NET.seat}`]: deleteField() });
+    } catch (e) {}
+  }
+  NET.code = null; NET.seat = null; NET.game = null; NET.isHost = false; NET.room = null; NET.onRemote = null;
+  netPersist();
+}
+
+function netListenPublicRooms(onUpdate) {
+  let unsub = null;
+  fb().then(({ db, collection, query, where, limit, onSnapshot }) => {
+    const q = query(collection(db, 'rooms'), where('status', '==', 'waiting'), limit(30));
+    unsub = onSnapshot(q, (snap) => {
+      const rooms = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => !r.private);
+      onUpdate(rooms);
+    });
+  });
+  return () => { if (unsub) unsub(); };
+}
 
 // ═══════════════════════════════════════════
 //  NAVIGATION
@@ -1057,7 +1238,14 @@ function setSeg(groupId, btn, key, val) {
   if (key === 'four-opp' || key === 'ttt-opp') {
     const prefix = key.split('-')[0];
     document.getElementById(prefix+'-opp-hint').textContent =
-      val === 'ai' ? 'AI takes its turn automatically.' : 'Two people share this device.';
+      val === 'ai' ? 'AI takes its turn automatically.' :
+      val === 'online' ? 'Share the room code with a friend on another device.' :
+      'Two people share this device.';
+  }
+  if (key === 'hm-mode') {
+    document.getElementById('hm-mode-hint').textContent =
+      val === 'online' ? 'Share the room code — guessers join from their own device.' :
+      'Everyone guesses from this one device.';
   }
 }
 
@@ -1078,6 +1266,132 @@ function pickColor(myGroup, otherGroup, chip) {
     } else {
       c.classList.remove('blocked');
     }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  ONLINE ORCHESTRATION (shared by all games)
+// ═══════════════════════════════════════════
+function findWinGeneric(board, row, col, player, winLen) {
+  const rows = board.length, cols = board[0].length;
+  const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+  for (const [dr,dc] of dirs) {
+    let cells = [[row,col]];
+    for (const s of [1,-1]) {
+      let r = row+dr*s, c = col+dc*s;
+      while (r>=0&&r<rows&&c>=0&&c<cols&&board[r][c]===player) { cells.push([r,c]); r+=dr*s; c+=dc*s; }
+    }
+    if (cells.length >= winLen) return cells;
+  }
+  return null;
+}
+
+// Firestore rejects nested arrays, so 2D boards are flattened to 1D for
+// storage/transport, and win-cell coordinate pairs are stored as {r,c} maps.
+function flattenBoard(board) { return board.flat(); }
+function unflattenBoard(flat, rows, cols) {
+  const board = [];
+  for (let r = 0; r < rows; r++) board.push(flat.slice(r * cols, r * cols + cols));
+  return board;
+}
+function encodeCells(cells) { return cells ? cells.map(([r,c]) => ({r,c})) : null; }
+function decodeCells(cells) { return cells ? cells.map(o => [o.r, o.c]) : null; }
+
+function startOnlineRoom(game) {
+  const roomNameId = game === 'hangman' ? 'hm-room-name' : game + '-room-name';
+  const privateId = game === 'hangman' ? 'hm-private' : game + '-private';
+  const roomNameEl = document.getElementById(roomNameId);
+  const privateEl = document.getElementById(privateId);
+  const roomName = (roomNameEl && roomNameEl.value.trim()) || 'Game room';
+  const isPrivate = !!(privateEl && privateEl.checked);
+
+  let settings, initialState;
+  if (game === 'four') {
+    settings = { rows: S.rows, cols: S.cols, winLen: S.winLen, p1color: S.p1color, p2color: S.p2color, hoverEnabled: S.hoverEnabled };
+    initialState = { board: flattenBoard(Array.from({length:S.rows}, () => Array(S.cols).fill(0))), currentPlayer: 1, gameOver: false, winner: null, winCells: null };
+  } else if (game === 'ttt') {
+    settings = { tttGrid: S.tttGrid, winLen: S.winLen, boTarget: S.boTarget, p1sym: S.p1sym, p2sym: S.p2sym, p1color: S.p1color, p2color: S.p2color };
+    initialState = { board: flattenBoard(Array.from({length:S.tttGrid}, () => Array(S.tttGrid).fill(0))), currentPlayer: 1, gameOver: false, winner: null, winCells: null, scores: [0,0], gamesPlayed: 0 };
+  } else if (game === 'hangman') {
+    settings = { category: HM.category, maxWrong: HM.maxWrong, rounds: HM.rounds, wordSource: HM.wordSource };
+    initialState = { word: '', guessed: [], wrong: 0, hmState: 'idle', currentRound: 1 };
+  }
+
+  netCreateRoom(game, roomName, isPrivate, settings, initialState).then(() => {
+    showWaitingScreen(NET.code, game);
+    netListenRoom(NET.code, onRoomUpdate);
+    netStartHeartbeat();
+  }).catch(err => {
+    alert('Could not create the room: ' + err.message);
+    showScreen('create');
+  });
+}
+
+function joinByCode() {
+  attemptJoin(document.getElementById('code-in').value);
+}
+
+function joinRoomFromLobby(code) {
+  document.getElementById('code-in').value = code;
+  attemptJoin(code);
+}
+
+function attemptJoin(code) {
+  const errEl = document.getElementById('join-error');
+  if (errEl) errEl.textContent = '';
+  netJoinRoom(code).then(() => {
+    showWaitingScreen(NET.code, NET.game);
+    netListenRoom(NET.code, onRoomUpdate);
+    netStartHeartbeat();
+  }).catch(err => {
+    const msg = err.message === 'not-found' ? 'No room found with that code.'
+      : err.message === 'full' ? 'That room is already full.'
+      : err.message === 'finished' ? 'That game has already finished.'
+      : err.message === 'empty' ? 'Type a room code first.'
+      : "Couldn't join that room.";
+    if (errEl) errEl.textContent = msg;
+  });
+}
+
+function showWaitingScreen(code, game) {
+  const names = { four: '4 in a Row', ttt: 'Tic Tac Toe', hangman: 'Hangman' };
+  document.getElementById('waiting-code').textContent = code;
+  document.getElementById('waiting-title').textContent = 'Waiting for a friend…';
+  document.getElementById('waiting-sub').textContent = `Share this code so a friend can join your ${names[game] || 'game'} room.`;
+  showScreen('waiting');
+}
+
+function cancelWaiting() {
+  netLeaveRoom();
+  showScreen('create');
+}
+
+function onRoomUpdate(room) {
+  if (!room) {
+    if (NET.code) {
+      netLeaveRoom();
+      alert('This room no longer exists.');
+      showScreen('intro');
+    }
+    return;
+  }
+  if (room.status === 'waiting') {
+    showWaitingScreen(room.code, room.game);
+    return;
+  }
+  if (room.game === 'four') fourApplyRemote(room);
+  else if (room.game === 'ttt') tttApplyRemote(room);
+  else if (room.game === 'hangman') hmApplyRemote(room);
+  updateDisconnectBanner(room);
+}
+
+function updateDisconnectBanner(room) {
+  const stale = netOpponentStale(room);
+  ['online-banner', 'hm-online-banner'].forEach(id => {
+    const bar = document.getElementById(id);
+    if (!bar) return;
+    if (stale) { bar.style.display = 'block'; bar.textContent = '⚠ Someone may have disconnected.'; }
+    else bar.style.display = 'none';
   });
 }
 
@@ -1116,6 +1430,7 @@ function startGame(game) {
     S.currentPlayer = first === 'random' ? (Math.random() < 0.5 ? 1 : 2) : 1;
   }
 
+  if (S.opponent === 'online') { startOnlineRoom(game); return; }
   setupStatusBar();
   showScreen('game');
   initRound();
@@ -1135,8 +1450,9 @@ function setupStatusBar() {
     p2d.style.cssText = `color:${S.p2color};font-size:16px;font-weight:700;width:auto;height:auto;background:none;border:none;border-radius:0`;
     p2d.textContent = S.p2sym;
   }
-  document.getElementById('p1-label').textContent = 'Player 1';
-  document.getElementById('p2-label').textContent = S.opponent === 'ai' ? 'AI' : 'Player 2';
+  const isOnline = S.opponent === 'online';
+  document.getElementById('p1-label').textContent = 'Player 1' + (isOnline && NET.seat === 1 ? ' (You)' : '');
+  document.getElementById('p2-label').textContent = (S.opponent === 'ai' ? 'AI' : 'Player 2') + (isOnline && NET.seat === 2 ? ' (You)' : '');
   document.getElementById('game-nav-center').textContent =
     S.boTarget > 1 ? `Best of ${S.boTarget}` : '';
 }
@@ -1147,6 +1463,12 @@ function updateStatus() {
   if (S.aiThinking) {
     msg.innerHTML = `AI thinking <span class="think-dots"><span class="think-dot"></span><span class="think-dot"></span><span class="think-dot"></span></span>`;
     msg.className = 'status-center';
+    return;
+  }
+  if (S.opponent === 'online') {
+    const mine = S.currentPlayer === NET.seat;
+    msg.textContent = mine ? '⬆ Your turn' : "Waiting for the other player…";
+    msg.className = 'status-center' + (mine ? ' active-turn' : '');
     return;
   }
   const isP1 = S.currentPlayer === 1;
@@ -1239,12 +1561,75 @@ function onColHover(col, enter) {
 }
 
 function humanDropFour(col) {
-  if (S.gameOver || S.aiThinking || S.currentPlayer !== 1) return;
+  if (S.gameOver || S.aiThinking) return;
+  if (S.opponent === 'ai' && S.currentPlayer !== 1) return;
+  if (S.opponent === 'online' && S.currentPlayer !== NET.seat) return;
   for (let c = 0; c < S.cols; c++) {
     const d = document.getElementById(`hdisc-${c}`);
     if (d) d.classList.remove('visible');
   }
-  dropDisc(col, 1);
+  if (S.opponent === 'online') { netDropFour(col); return; }
+  dropDisc(col, S.currentPlayer);
+}
+
+function netDropFour(col) {
+  const mySeat = NET.seat, myWinLen = S.winLen, rows = S.rows, cols = S.cols;
+  netUpdateState(state => {
+    if (state.gameOver || state.currentPlayer !== mySeat) return state;
+    const board = unflattenBoard(state.board, rows, cols);
+    let row = -1;
+    for (let r = board.length - 1; r >= 0; r--) if (board[r][col] === 0) { row = r; break; }
+    if (row === -1) return state;
+    board[row][col] = mySeat;
+    const winCells = findWinGeneric(board, row, col, mySeat, myWinLen);
+    const full = board.every(r => r.every(c => c !== 0));
+    return {
+      ...state, board: flattenBoard(board),
+      currentPlayer: mySeat === 1 ? 2 : 1,
+      gameOver: !!winCells || full,
+      winner: winCells ? mySeat : (full ? 0 : null),
+      winCells: encodeCells(winCells)
+    };
+  });
+}
+
+function fourApplyRemote(room) {
+  const st = room.state;
+  if (!st || !st.board) return;
+  const entering = !document.getElementById('screen-game').classList.contains('active');
+  if (entering) {
+    S.game = 'four'; S.opponent = 'online';
+    S.rows = room.settings.rows; S.cols = room.settings.cols; S.winLen = room.settings.winLen;
+    S.p1color = room.settings.p1color; S.p2color = room.settings.p2color;
+    S.hoverEnabled = room.settings.hoverEnabled;
+    S.boTarget = 1; S.scores = [0,0]; S.gamesPlayed = 0;
+    S.board = Array.from({length:S.rows}, () => Array(S.cols).fill(0));
+    S._resultShown = false;
+    setupStatusBar();
+    showScreen('game');
+    buildFourBoard();
+    document.getElementById('timer-bar-wrap').style.display = 'none';
+  }
+  const remoteBoard = unflattenBoard(st.board, S.rows, S.cols);
+  for (let r = 0; r < S.rows; r++) {
+    for (let c = 0; c < S.cols; c++) {
+      const was = S.board[r][c], now = remoteBoard[r][c];
+      if (now && now !== was) renderDisc(r, c, now);
+    }
+  }
+  S.board = remoteBoard;
+  S.currentPlayer = st.currentPlayer;
+  S.gameOver = !!st.gameOver;
+  if (S.gameOver) {
+    if (!S._resultShown) {
+      S._resultShown = true;
+      if (st.winCells) flashCells(decodeCells(st.winCells));
+      setTimeout(() => showResult(st.winner), 100);
+    }
+  } else {
+    S._resultShown = false;
+    updateStatus();
+  }
 }
 
 function dropDisc(col, player) {
@@ -1442,8 +1827,83 @@ function refreshTTTScores() {
 function humanMoveTTT(r,c) {
   if (S.gameOver||S.aiThinking||S.board[r][c]!==0) return;
   if (S.opponent==='ai'&&S.currentPlayer!==1) return;
+  if (S.opponent==='online') {
+    if (S.currentPlayer !== NET.seat) return;
+    netMoveTTT(r,c);
+    return;
+  }
   placeToken(r,c,S.currentPlayer);
   afterTTTMove(S.currentPlayer);
+}
+
+function netMoveTTT(r, c) {
+  const mySeat = NET.seat, winLen = S.winLen, boTarget = S.boTarget, n = S.tttGrid;
+  netUpdateState(state => {
+    const board = unflattenBoard(state.board, n, n);
+    if (state.gameOver || state.currentPlayer !== mySeat || board[r][c] !== 0) return state;
+    board[r][c] = mySeat;
+    const winCells = findWinGeneric(board, r, c, mySeat, winLen);
+    const full = board.every(row => row.every(v => v !== 0));
+    let scores = (state.scores || [0,0]).slice();
+    let gamesPlayed = state.gamesPlayed || 0;
+    let gameOver = false, winner = null, seriesDone = false;
+    if (winCells || full) {
+      gameOver = true;
+      winner = winCells ? mySeat : 0;
+      if (winner > 0) scores[winner - 1]++;
+      gamesPlayed++;
+      const need = Math.ceil((boTarget || 1) / 2);
+      seriesDone = (boTarget || 1) === 1 || scores[0] >= need || scores[1] >= need || gamesPlayed >= (boTarget || 1);
+    }
+    return { ...state, board: flattenBoard(board), currentPlayer: mySeat === 1 ? 2 : 1, gameOver, winner, winCells: encodeCells(winCells), scores, gamesPlayed, seriesDone };
+  });
+}
+
+function tttApplyRemote(room) {
+  const st = room.state;
+  if (!st || !st.board) return;
+  const entering = !document.getElementById('screen-game').classList.contains('active');
+  if (entering) {
+    S.game = 'ttt'; S.opponent = 'online';
+    S.tttGrid = room.settings.tttGrid; S.winLen = room.settings.winLen; S.boTarget = room.settings.boTarget;
+    S.p1sym = room.settings.p1sym; S.p2sym = room.settings.p2sym;
+    S.p1color = room.settings.p1color; S.p2color = room.settings.p2color;
+    S.scores = [0,0]; S.gamesPlayed = 0;
+    S.board = Array.from({length:S.tttGrid}, () => Array(S.tttGrid).fill(0));
+    S._resultShown = false;
+    setupStatusBar();
+    showScreen('game');
+    buildTTTBoard();
+    document.getElementById('timer-bar-wrap').style.display = 'none';
+  }
+  const remoteBoard = unflattenBoard(st.board, S.tttGrid, S.tttGrid);
+  for (let r = 0; r < S.tttGrid; r++) {
+    for (let c = 0; c < S.tttGrid; c++) {
+      const was = (S.board[r] && S.board[r][c]) || 0, now = remoteBoard[r][c];
+      if (now && now !== was) placeToken(r, c, now);
+    }
+  }
+  S.board = remoteBoard;
+  S.currentPlayer = st.currentPlayer;
+  S.scores = st.scores || [0,0];
+  S.gamesPlayed = st.gamesPlayed || 0;
+  refreshTTTScores();
+  S.gameOver = !!st.gameOver;
+  if (S.gameOver) {
+    if (!S._resultShown) {
+      S._resultShown = true;
+      NET.seriesDone = !!st.seriesDone;
+      const cells = decodeCells(st.winCells);
+      if (cells) cells.forEach(([r,c]) => {
+        const el = document.querySelector(`#ttt-board [data-r="${r}"][data-c="${c}"]`);
+        if (el) el.classList.add('win-line');
+      });
+      setTimeout(() => showResult(st.winner), 400);
+    }
+  } else {
+    S._resultShown = false;
+    updateStatus();
+  }
 }
 
 function placeToken(r,c,player) {
@@ -1617,20 +2077,52 @@ function showResult(w){
 
 function rematch(){
   document.getElementById('result-overlay').style.display='none';
+  if (S.opponent === 'online') { netRematch(); return; }
   S.scores=[0,0];S.gamesPlayed=0;S.currentPlayer=1;initRound();
+}
+
+function netRematch(){
+  if (S.game === 'four') {
+    netUpdateState(state => ({
+      ...state,
+      board: flattenBoard(Array.from({length:S.rows}, () => Array(S.cols).fill(0))),
+      currentPlayer: 1, gameOver: false, winner: null, winCells: null
+    }));
+  } else if (S.game === 'ttt') {
+    const full = flattenBoard(Array.from({length:S.tttGrid}, () => Array(S.tttGrid).fill(0)));
+    if (NET.seriesDone) {
+      netUpdateState(state => ({ ...state, board: full, currentPlayer: 1, gameOver: false, winner: null, winCells: null, scores: [0,0], gamesPlayed: 0, seriesDone: false }));
+    } else {
+      netUpdateState(state => ({ ...state, board: full, currentPlayer: (state.gamesPlayed % 2 === 0) ? 1 : 2, gameOver: false, winner: null, winCells: null }));
+    }
+  }
+}
+
+function backToMenuFromResult(){
+  document.getElementById('result-overlay').style.display='none';
+  if (NET.code) netLeaveRoom();
+  showScreen('intro');
+}
+
+function goHome(){
+  if (NET.code) { confirmQuit(); return; }
+  showScreen('intro');
 }
 
 function confirmQuit(){
   const ov=document.createElement('div');
   ov.id='quit-overlay';
   ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center';
-  ov.innerHTML=`<div style="background:#1e1e28;border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:36px 40px;text-align:center;max-width:320px;width:90%;animation:fadeUp 0.25s ease"><p style="font-size:20px;font-weight:700;margin-bottom:8px">Quit game?</p><p style="font-size:14px;color:rgba(240,238,255,0.5);margin-bottom:28px">You'll lose your current progress.</p><div style="display:flex;gap:10px;justify-content:center"><button onclick="document.getElementById('quit-overlay').remove()" style="background:transparent;color:rgba(240,238,255,0.6);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:11px 24px;font-family:inherit;font-size:14px;cursor:pointer">Keep playing</button><button onclick="quitConfirmed()" style="background:#7c6ff7;color:#fff;border:none;border-radius:10px;padding:11px 24px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Quit</button></div></div>`;
+  const msg = NET.code ? "You'll leave the room. The other player can keep playing without you." : "You'll lose your current progress.";
+  ov.innerHTML=`<div style="background:#1e1e28;border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:36px 40px;text-align:center;max-width:320px;width:90%;animation:fadeUp 0.25s ease"><p style="font-size:20px;font-weight:700;margin-bottom:8px">Quit game?</p><p style="font-size:14px;color:rgba(240,238,255,0.5);margin-bottom:28px">${msg}</p><div style="display:flex;gap:10px;justify-content:center"><button onclick="document.getElementById('quit-overlay').remove()" style="background:transparent;color:rgba(240,238,255,0.6);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:11px 24px;font-family:inherit;font-size:14px;cursor:pointer">Keep playing</button><button onclick="quitConfirmed()" style="background:#7c6ff7;color:#fff;border:none;border-radius:10px;padding:11px 24px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Quit</button></div></div>`;
   document.body.appendChild(ov);
 }
 
 function quitConfirmed(){
   const ov=document.getElementById('quit-overlay');if(ov)ov.remove();
-  clearInterval(S.timerInterval);S.gameOver=true;S.aiThinking=false;showScreen('intro');
+  clearInterval(S.timerInterval);S.gameOver=true;S.aiThinking=false;
+  if (NET.code) netLeaveRoom();
+  showScreen('intro');
 }
 
 // ═══════════════════════════════════════════
@@ -1978,6 +2470,8 @@ function startHangman() {
   HM.currentRound = 1;
   HM.scores = {};
 
+  if (cfg['hm-mode'] === 'online') { startOnlineRoom('hangman'); return; }
+
   if (HM.wordSource === 'custom') {
     // Show set-word screen first
     const inp = document.getElementById('hm-secret-input');
@@ -1998,6 +2492,11 @@ function hmConfirmWord() {
   }
   if (val.length < 2) {
     document.getElementById('hm-setword-hint').textContent = '⚠ Word must be at least 2 letters.';
+    return;
+  }
+  if (NET.code && NET.game === 'hangman') {
+    const word = val.toUpperCase().replace(/[^A-Z ]/g, '');
+    netUpdateState(state => ({ ...state, word, guessed: [], wrong: 0 }));
     return;
   }
   hmStartRound(val);
@@ -2035,12 +2534,103 @@ function hmPickWord() {
 
 function hmGuess(letter) {
   if (HM.state !== 'playing' || HM.guessed.has(letter)) return;
+  if (NET.code && NET.game === 'hangman') {
+    if (S._hmIsSetter) return;
+    netGuessHangman(letter);
+    return;
+  }
   HM.guessed.add(letter);
   if (!HM.word.includes(letter)) HM.wrong++;
   const allRevealed = [...HM.word].every(c => c===' ' || HM.guessed.has(c));
   if (allRevealed) HM.state = 'won';
   else if (HM.wrong >= HM.maxWrong) HM.state = 'lost';
   hmRender();
+}
+
+function netGuessHangman(letter) {
+  netUpdateState(state => {
+    if (!state.word) return state;
+    const guessed = state.guessed || [];
+    if (guessed.includes(letter)) return state;
+    let wrong = state.wrong || 0;
+    if (!state.word.includes(letter)) wrong++;
+    return { ...state, guessed: [...guessed, letter], wrong };
+  });
+}
+
+function netHmNextRound() {
+  netUpdateState(state => {
+    const nextRound = (state.currentRound || 1) + 1;
+    if (nextRound > HM.rounds) return state;
+    let word = '';
+    if (HM.wordSource !== 'custom') word = hmPickWord().toUpperCase().replace(/[^A-Z ]/g, '');
+    return { ...state, word, guessed: [], wrong: 0, currentRound: nextRound };
+  });
+}
+
+function setupHangmanOnlineUI(room) {
+  const isOnline = !!(NET.code && NET.game === 'hangman');
+  document.getElementById('hm-local-controls').style.display = isOnline ? 'none' : '';
+  document.getElementById('hm-local-actions').style.display = isOnline ? 'none' : 'flex';
+  document.getElementById('hm-online-actions').style.display = isOnline ? 'flex' : 'none';
+  const roleMsg = document.getElementById('hm-role-msg');
+  if (!isOnline) { roleMsg.style.display = 'none'; return; }
+  const st = room.state || {};
+  S._hmIsSetter = room.settings.wordSource === 'custom' && NET.isHost;
+  roleMsg.style.display = 'block';
+  if (!st.word) {
+    roleMsg.textContent = NET.isHost ? 'Choose a word for the others to guess.' : 'Waiting for the host to choose a word…';
+  } else if (S._hmIsSetter) {
+    roleMsg.textContent = 'You set the word — sit back and watch the others guess!';
+  } else {
+    roleMsg.textContent = `Room ${room.code} · Round ${st.currentRound || 1}/${room.settings.rounds}`;
+  }
+  if (S._hmIsSetter) document.querySelectorAll('.key-btn').forEach(btn => btn.disabled = true);
+  const nextBtn = document.getElementById('hm-next-round-btn');
+  if (nextBtn) {
+    const roundOver = HM.state === 'won' || HM.state === 'lost';
+    nextBtn.style.display = (roundOver && HM.currentRound < HM.rounds) ? 'inline-block' : 'none';
+  }
+}
+
+function hmApplyRemote(room) {
+  const st = room.state || {};
+  HM.maxWrong = room.settings.maxWrong;
+  HM.category = room.settings.category;
+  HM.rounds = room.settings.rounds;
+  HM.wordSource = room.settings.wordSource;
+  HM.currentRound = st.currentRound || 1;
+
+  if (!st.word) {
+    if (NET.isHost && room.settings.wordSource === 'custom') {
+      if (!document.getElementById('screen-hangman-setword').classList.contains('active')) {
+        const inp = document.getElementById('hm-secret-input');
+        if (inp) inp.value = '';
+        const hint = document.getElementById('hm-setword-hint');
+        if (hint) hint.textContent = '';
+        showScreen('hangman-setword');
+      }
+      return;
+    }
+    if (NET.isHost && room.settings.wordSource !== 'custom' && !S._hmWordPicking) {
+      S._hmWordPicking = true;
+      const word = hmPickWord().toUpperCase().replace(/[^A-Z ]/g, '');
+      netUpdateState(state => state.word ? state : { ...state, word, guessed: [], wrong: 0 })
+        .finally(() => { S._hmWordPicking = false; });
+    }
+    HM.word = ''; HM.guessed = new Set(); HM.wrong = 0; HM.state = 'idle';
+  } else {
+    HM.word = st.word;
+    HM.guessed = new Set(st.guessed || []);
+    HM.wrong = st.wrong || 0;
+    const allRevealed = [...HM.word].every(c => c === ' ' || HM.guessed.has(c));
+    HM.state = allRevealed ? 'won' : (HM.wrong >= HM.maxWrong ? 'lost' : 'playing');
+  }
+
+  const wasActive = document.getElementById('screen-hangman').classList.contains('active');
+  if (!wasActive) { showScreen('hangman'); hmInitKeyboard(); }
+  hmRender();
+  setupHangmanOnlineUI(room);
 }
 
 function hmRender() {
@@ -2189,11 +2779,52 @@ function diceRenderHistory() {
 document.getElementById('code-in').addEventListener('input', e => {
   e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
 });
+
+// ═══════════════════════════════════════════
+//  LOBBY (live "Open rooms" list) + RECONNECT
+// ═══════════════════════════════════════════
+function renderPublicRooms(rooms) {
+  const el = document.getElementById('rooms-list');
+  if (!el) return;
+  if (!rooms.length) { el.innerHTML = '<p class="hint">No open rooms right now — create one!</p>'; return; }
+  const names = { four: '4 in a Row', ttt: 'Tic Tac Toe', hangman: 'Hangman' };
+  el.innerHTML = rooms.map(r => {
+    const count = Object.keys(r.players || {}).length;
+    return `<div class="room-card" onclick="joinRoomFromLobby('${r.code}')">
+      <div><p class="room-name">${(r.roomName||'Game room').replace(/</g,'&lt;')}</p>
+      <div class="room-meta"><span>${names[r.game] || r.game}</span><span>${count} / ${r.maxSeats} players</span></div></div>
+      <div class="room-right"><div class="dot dot-green"></div><button class="join-pill">Join</button></div>
+    </div>`;
+  }).join('');
+}
+
+let _lobbyUnsub = null;
+const _origShowScreen = showScreen;
+showScreen = function(id) {
+  _origShowScreen(id);
+  if (id === 'join') {
+    if (!_lobbyUnsub) _lobbyUnsub = netListenPublicRooms(renderPublicRooms);
+  } else if (_lobbyUnsub) {
+    _lobbyUnsub(); _lobbyUnsub = null;
+  }
+};
+
+(function tryReconnect() {
+  const raw = sessionStorage.getItem('aycp-room');
+  if (!raw) return;
+  try {
+    const saved = JSON.parse(raw);
+    if (!saved.code || !saved.seat || !saved.game) return;
+    NET.code = saved.code; NET.seat = saved.seat; NET.game = saved.game; NET.isHost = (saved.seat === 1);
+    netListenRoom(NET.code, onRoomUpdate);
+    netStartHeartbeat();
+  } catch (e) {}
+})();
 </script>
 <!-- ═══ HANGMAN ═══ -->
 <div id="screen-hangman" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
     <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
   </nav>
   <div class="inner" style="max-width:860px">
@@ -2210,33 +2841,41 @@ document.getElementById('code-in').addEventListener('input', e => {
         <p class="hangman-meta" id="hm-meta">Pick a category to start</p>
       </div>
       <div class="hangman-right">
-        <div class="settings-block" style="padding:16px 18px">
-          <p class="block-title">Category</p>
-          <div class="category-row">
-            <button class="cat-btn active" onclick="hmSetCategory('random',this)">🎲 Random</button>
-            <button class="cat-btn" onclick="hmSetCategory('animals',this)">🐘 Animals</button>
-            <button class="cat-btn" onclick="hmSetCategory('countries',this)">🌍 Countries</button>
-            <button class="cat-btn" onclick="hmSetCategory('food',this)">🍕 Food</button>
-            <button class="cat-btn" onclick="hmSetCategory('tech',this)">💻 Tech</button>
+        <p id="hm-online-banner" style="display:none;text-align:center;font-size:12px;color:var(--yellow);margin:0 0 4px"></p>
+        <p id="hm-role-msg" style="display:none;text-align:center;font-size:14px;font-weight:600;margin:0 0 4px"></p>
+        <div id="hm-local-controls">
+          <div class="settings-block" style="padding:16px 18px">
+            <p class="block-title">Category</p>
+            <div class="category-row">
+              <button class="cat-btn active" onclick="hmSetCategory('random',this)">🎲 Random</button>
+              <button class="cat-btn" onclick="hmSetCategory('animals',this)">🐘 Animals</button>
+              <button class="cat-btn" onclick="hmSetCategory('countries',this)">🌍 Countries</button>
+              <button class="cat-btn" onclick="hmSetCategory('food',this)">🍕 Food</button>
+              <button class="cat-btn" onclick="hmSetCategory('tech',this)">💻 Tech</button>
+            </div>
           </div>
-        </div>
-        <div class="settings-block" style="padding:16px 18px">
-          <p class="block-title">Custom word</p>
-          <div class="custom-word-row">
-            <input class="custom-word-input" id="hm-custom-input" placeholder="Type a secret word…" maxlength="30"
-              onkeydown="if(event.key==='Enter'){const v=this.value.trim();if(v){hmStart(v);this.value=''}}"/>
-            <button class="custom-word-btn" onclick="const v=document.getElementById('hm-custom-input').value.trim();if(v){hmStart(v);document.getElementById('hm-custom-input').value=''}">Set word</button>
+          <div class="settings-block" style="padding:16px 18px">
+            <p class="block-title">Custom word</p>
+            <div class="custom-word-row">
+              <input class="custom-word-input" id="hm-custom-input" placeholder="Type a secret word…" maxlength="30"
+                onkeydown="if(event.key==='Enter'){const v=this.value.trim();if(v){hmStart(v);this.value=''}}"/>
+              <button class="custom-word-btn" onclick="const v=document.getElementById('hm-custom-input').value.trim();if(v){hmStart(v);document.getElementById('hm-custom-input').value=''}">Set word</button>
+            </div>
+            <p class="hint" style="margin-top:6px">Pass the device — the other player sets the word, you guess.</p>
           </div>
-          <p class="hint" style="margin-top:6px">Pass the device — the other player sets the word, you guess.</p>
         </div>
         <div class="word-display" id="hm-word">
           <span style="color:var(--muted);font-size:14px">Start a game to see the word slots</span>
         </div>
         <p class="hangman-status" id="hm-status"></p>
         <div class="keyboard" id="hm-keyboard"></div>
-        <div style="display:flex;gap:10px;margin-top:4px">
+        <div style="display:flex;gap:10px;margin-top:4px" id="hm-local-actions">
           <button class="btn-create" style="flex:1" onclick="hmStart()">Random word</button>
           <button class="btn-cancel" style="flex:1" onclick="hmStart()">New game</button>
+        </div>
+        <div style="display:none;gap:10px;margin-top:4px" id="hm-online-actions">
+          <button class="btn-create" style="flex:1;display:none" id="hm-next-round-btn" onclick="netHmNextRound()">Next round →</button>
+          <button class="btn-cancel" style="flex:1" onclick="confirmQuit()">Leave room</button>
         </div>
       </div>
     </div>
@@ -2246,7 +2885,7 @@ document.getElementById('code-in').addEventListener('input', e => {
 <!-- ═══ DICE ROLLER ═══ -->
 <div id="screen-dice" class="screen">
   <nav class="nav">
-    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
     <button class="nav-back" onclick="showScreen('tools')">← Back to tools</button>
   </nav>
   <div class="inner" style="max-width:760px">

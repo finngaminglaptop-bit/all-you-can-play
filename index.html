@@ -946,7 +946,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
     <div class="settings-block" style="width:100%;padding:24px;text-align:left" id="gc-setcode-form">
       <div class="field">
         <label id="gc-setcode-label">Secret code</label>
-        <input type="password" id="gc-secret-input" class="custom-word-input" placeholder="Type digits…" inputmode="numeric" autocomplete="off" style="width:100%;font-size:18px;letter-spacing:0.2em"
+        <input type="text" id="gc-secret-input" class="custom-word-input" placeholder="Type digits…" inputmode="numeric" autocomplete="off" style="width:100%;font-size:18px;letter-spacing:0.2em"
           oninput="this.value=this.value.replace(/[^0-9]/g,'')"
           onkeydown="if(event.key==='Enter') gcSubmitCode()"/>
       </div>
@@ -3173,23 +3173,29 @@ function gcApplyRemote(room) {
 
   if (GC.phase === 'setting') {
     const mySubmitted = !!GC.codesSubmitted[NET.seat];
-    document.getElementById('gc-setcode-title').textContent = 'Set your secret code';
-    document.getElementById('gc-setcode-sub').textContent = `Type a ${GC.length}-digit code — your opponent won't see it.`;
-    document.getElementById('gc-setcode-label').textContent = `Your ${GC.length}-digit code`;
-    document.getElementById('gc-secret-input').maxLength = GC.length;
+    const alreadyOnSetScreen = document.getElementById('screen-guesscode-setcode').classList.contains('active');
     const form = document.getElementById('gc-setcode-form');
     const actions = document.getElementById('gc-setcode-actions');
     const waitingMsg = document.getElementById('gc-waiting-msg');
     if (mySubmitted) {
+      // Safe to re-run every sync — there's no in-progress typing to preserve here.
       form.style.display = 'none'; actions.style.display = 'none';
       waitingMsg.style.display = 'block';
       waitingMsg.textContent = 'Waiting for the other player to set their code…';
-    } else {
-      form.style.display = ''; actions.style.display = 'flex'; waitingMsg.style.display = 'none';
+      showScreen('guesscode-setcode');
+    } else if (!alreadyOnSetScreen) {
+      // Only initialize the form the first time it appears — re-running this on
+      // every background sync (e.g. the 8s presence heartbeat) would wipe
+      // whatever the player is mid-typing.
+      document.getElementById('gc-setcode-title').textContent = 'Set your secret code';
+      document.getElementById('gc-setcode-sub').textContent = `Type a ${GC.length}-digit code — your opponent won't see it.`;
+      document.getElementById('gc-setcode-label').textContent = `Your ${GC.length}-digit code`;
+      document.getElementById('gc-secret-input').maxLength = GC.length;
       document.getElementById('gc-secret-input').value = '';
       document.getElementById('gc-setcode-hint').textContent = '';
+      form.style.display = ''; actions.style.display = 'flex'; waitingMsg.style.display = 'none';
+      showScreen('guesscode-setcode');
     }
-    showScreen('guesscode-setcode');
     return;
   }
 

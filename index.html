@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>All-you-can-Play</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0e0e12;--surface:#16161e;--card:#1e1e28;--card2:#24242f;
+  --border:rgba(255,255,255,0.08);--border-h:rgba(255,255,255,0.18);
+  --text:#f0eeff;--muted:rgba(240,238,255,0.45);--muted2:rgba(240,238,255,0.65);
+  --accent:#7c6ff7;--accent-g:rgba(124,111,247,0.22);
+  --accent2:#f76fa8;--green:#5ef0a0;--yellow:#f7c96f;
+  --font:'Space Grotesk',sans-serif;--mono:'Space Mono',monospace;
+}
+body{background:var(--bg);font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(rgba(124,111,247,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(124,111,247,0.04) 1px,transparent 1px);
+  background-size:40px 40px}
+
+/* NAV */
+.nav{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px;border-bottom:1px solid var(--border);
+  background:rgba(14,14,18,0.85);backdrop-filter:blur(12px);flex-shrink:0}
+.nav-logo{font-size:15px;font-weight:700;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer}
+.nav-back{font-size:13px;color:var(--muted);cursor:pointer;display:flex;align-items:center;
+  gap:6px;transition:color 0.15s;background:none;border:none;font-family:var(--font)}
+.nav-back:hover{color:var(--text)}
+
+/* INNER */
+.inner{max-width:860px;margin:0 auto;width:100%;padding:44px 24px 72px;position:relative;z-index:1;flex:1}
+.page-title{font-size:26px;font-weight:700;letter-spacing:-0.02em;margin-bottom:6px}
+.page-sub{font-size:14px;color:var(--muted);margin-bottom:36px}
+
+/* INTRO */
+#screen-intro{align-items:center;justify-content:center;text-align:center;position:relative}
+.intro-inner{position:relative;z-index:1}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.2em;color:var(--accent);
+  text-transform:uppercase;margin-bottom:24px;opacity:0;animation:fadeUp 0.6s ease 0.3s forwards}
+.logo{font-size:clamp(40px,8vw,68px);font-weight:700;line-height:1.05;letter-spacing:-0.02em;margin-bottom:14px}
+.logo-line1{display:block;opacity:0;animation:slideIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.6s forwards}
+.logo-line2{display:block;opacity:0;animation:slideIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.85s forwards;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tagline{font-size:15px;color:var(--muted);margin-bottom:44px;opacity:0;animation:fadeUp 0.6s ease 1.2s forwards}
+.btn-row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp 0.6s ease 1.4s forwards}
+.floaters{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.floater{position:absolute;font-size:11px;font-family:var(--mono);color:var(--accent);
+  background:rgba(124,111,247,0.08);border:1px solid rgba(124,111,247,0.15);
+  padding:4px 10px;border-radius:20px;animation:float 8s ease-in-out infinite;opacity:0.6}
+.f1{top:18%;left:8%;animation-delay:0s}.f2{top:28%;right:10%;animation-delay:1.5s}
+.f3{bottom:25%;left:12%;animation-delay:3s}.f4{bottom:20%;right:8%;animation-delay:2s}.f5{top:55%;left:5%;animation-delay:4s}
+
+/* BUTTONS */
+.btn{font-family:var(--font);font-size:15px;font-weight:600;padding:13px 36px;border-radius:12px;
+  cursor:pointer;transition:transform 0.15s,box-shadow 0.15s,background 0.15s;border:none;letter-spacing:0.01em}
+.btn:active{transform:scale(0.97)}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 0 28px var(--accent-g)}
+.btn-primary:hover{background:#8f84fa;box-shadow:0 0 44px rgba(124,111,247,0.38);transform:translateY(-2px)}
+.btn-secondary{background:transparent;color:var(--text);border:1px solid var(--border-h)}
+.btn-secondary:hover{background:rgba(255,255,255,0.05);transform:translateY(-2px)}
+
+/* GAME GRID */
+.game-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:14px}
+.game-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:22px 18px;cursor:pointer;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;
+  position:relative;overflow:hidden}
+.game-card::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,var(--card-glow,rgba(124,111,247,0.1)) 0%,transparent 70%);
+  opacity:0;transition:opacity 0.3s}
+.game-card:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,0,0,0.4)}
+.game-card:hover::before{opacity:1}
+.game-card.disabled{opacity:0.4;cursor:not-allowed}
+.game-card.disabled:hover{transform:none;box-shadow:none;border-color:var(--border)}
+.card-icon{font-size:30px;margin-bottom:12px;display:block;line-height:1}
+.card-name{font-size:14px;font-weight:600;margin-bottom:3px}
+.card-desc{font-size:12px;color:var(--muted);line-height:1.4}
+.card-badge{position:absolute;top:11px;right:11px;font-size:9px;font-family:var(--mono);
+  letter-spacing:0.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px}
+.badge-ready{background:rgba(94,240,160,0.12);color:var(--green);border:1px solid rgba(94,240,160,0.2)}
+.badge-soon{background:rgba(247,111,168,0.1);color:var(--accent2);border:1px solid rgba(247,111,168,0.2)}
+
+/* SETTINGS */
+.settings-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:580px){.settings-wrap{grid-template-columns:1fr}}
+.settings-col{display:flex;flex-direction:column;gap:14px}
+.settings-block{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 20px}
+.block-title{font-size:11px;font-family:var(--mono);letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:18px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.field label{font-size:12px;font-weight:600;color:var(--muted2)}
+.field input[type=text]{background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 13px;color:var(--text);font-family:var(--font);font-size:14px;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;width:100%}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-g)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between}
+.toggle-label{font-size:14px;color:var(--text)}
+.toggle-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0;position:absolute}
+.toggle-track{position:absolute;inset:0;background:var(--card2);border:1px solid var(--border-h);
+  border-radius:12px;cursor:pointer;transition:background 0.2s,border-color 0.2s}
+.toggle input:checked+.toggle-track{background:var(--accent);border-color:var(--accent)}
+.toggle-thumb{position:absolute;top:3px;left:3px;width:16px;height:16px;
+  background:#fff;border-radius:50%;transition:transform 0.2s;pointer-events:none}
+.toggle input:checked~.toggle-thumb{transform:translateX(20px)}
+.code-display{display:flex;align-items:center;gap:8px}
+.code-val{background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  padding:10px 13px;flex:1;font-family:var(--mono);font-size:16px;letter-spacing:0.2em;
+  color:var(--accent);font-weight:700}
+.copy-btn{background:rgba(124,111,247,0.12);border:1px solid rgba(124,111,247,0.25);
+  color:var(--accent);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;
+  font-weight:600;font-family:var(--font);transition:background 0.15s;white-space:nowrap}
+.copy-btn:hover{background:rgba(124,111,247,0.22)}
+.player-picker{display:flex;align-items:center;gap:10px}
+.p-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border-h);
+  background:var(--card2);color:var(--text);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background 0.15s;
+  flex-shrink:0;font-family:var(--font);line-height:1}
+.p-btn:hover{background:rgba(255,255,255,0.08)}
+.p-btn:disabled{opacity:0.3;cursor:not-allowed}
+.p-val{font-size:18px;font-weight:700;min-width:28px;text-align:center}
+.p-range{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.seg{display:flex;background:var(--card2);border:1px solid var(--border);
+  border-radius:8px;padding:3px;gap:3px}
+.seg-opt{flex:1;padding:7px 5px;border-radius:6px;border:none;background:transparent;
+  color:var(--muted);font-family:var(--font);font-size:12px;font-weight:600;
+  cursor:pointer;transition:background 0.15s,color 0.15s;text-align:center}
+.seg-opt.active{background:var(--accent);color:#fff}
+.color-row{display:flex;gap:8px;flex-wrap:wrap}
+.color-chip{width:28px;height:28px;border-radius:50%;cursor:pointer;
+  border:2px solid transparent;transition:transform 0.15s,border-color 0.15s,opacity 0.15s;flex-shrink:0}
+.color-chip:hover:not(.blocked){transform:scale(1.12)}
+.color-chip.selected{border-color:#fff;transform:scale(1.1)}
+.color-chip.blocked{opacity:0.25;cursor:not-allowed;filter:grayscale(0.5)}
+.settings-actions{display:flex;gap:12px;margin-top:28px;justify-content:flex-end}
+.btn-create{background:var(--accent);color:#fff;border:none;border-radius:10px;
+  padding:13px 32px;font-family:var(--font);font-size:15px;font-weight:700;
+  cursor:pointer;transition:background 0.15s,transform 0.1s}
+.btn-create:hover{background:#8f84fa}
+.btn-create:active{transform:scale(0.97)}
+.btn-cancel{background:transparent;color:var(--muted);border:1px solid var(--border);
+  border-radius:10px;padding:13px 24px;font-family:var(--font);font-size:14px;
+  cursor:pointer;transition:color 0.15s,border-color 0.15s}
+.btn-cancel:hover{color:var(--text);border-color:var(--border-h)}
+.hint{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.game-header{display:flex;align-items:center;gap:14px;margin-bottom:28px}
+.game-header-icon{font-size:36px;line-height:1}
+.game-header-name{font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.game-header-desc{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* JOIN */
+.section-label{font-size:11px;font-family:var(--mono);letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.rooms-list{display:flex;flex-direction:column;gap:10px;margin-bottom:36px}
+.room-card{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;transition:border-color 0.2s,background 0.15s}
+.room-card:hover{border-color:var(--border-h);background:#22222e}
+.room-name{font-size:14px;font-weight:600;margin-bottom:3px}
+.room-meta{font-size:12px;color:var(--muted);display:flex;gap:10px}
+.room-right{display:flex;align-items:center;gap:10px}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot-green{background:var(--green);box-shadow:0 0 5px var(--green)}
+.dot-yellow{background:var(--yellow);box-shadow:0 0 5px var(--yellow)}
+.join-pill{font-size:12px;font-weight:600;padding:6px 14px;border-radius:7px;
+  background:var(--accent);color:#fff;cursor:pointer;transition:background 0.15s;
+  border:none;font-family:var(--font)}
+.join-pill:hover{background:#8f84fa}
+.divider{display:flex;align-items:center;gap:12px;margin:28px 0;color:var(--muted);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.code-row{display:flex;gap:10px}
+.code-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:11px 14px;color:var(--text);font-family:var(--mono);font-size:15px;
+  letter-spacing:0.15em;outline:none;transition:border-color 0.2s,box-shadow 0.2s;text-transform:uppercase}
+.code-input::placeholder{color:var(--muted);letter-spacing:0.05em;text-transform:none}
+.code-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-g)}
+.btn-join-code{font-family:var(--font);font-size:14px;font-weight:600;padding:11px 22px;
+  border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;transition:background 0.15s}
+.btn-join-code:hover{background:#8f84fa}
+
+/* GAME SCREEN */
+#screen-game{background:var(--bg)}
+.game-area{max-width:960px;margin:0 auto;padding:24px 16px 48px;position:relative;z-index:1;
+  flex:1;display:flex;flex-direction:column}
+.game-status-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 20px}
+.player-tag{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;min-width:100px}
+.player-tag.right{justify-content:flex-end}
+.player-disc{width:18px;height:18px;border-radius:50%;flex-shrink:0}
+.status-center{font-size:13px;color:var(--muted);font-family:var(--mono);
+  letter-spacing:0.04em;text-align:center;flex:1}
+.status-center.active-turn{color:var(--accent)}
+.score-box{font-family:var(--mono);font-size:12px;color:var(--muted);
+  background:var(--card2);padding:4px 10px;border-radius:6px}
+
+/* FOUR IN A ROW */
+.four-wrap{display:flex;flex-direction:column;align-items:center;gap:0}
+.four-col-headers{display:flex;margin-bottom:4px}
+.col-hover-zone{cursor:pointer;display:flex;align-items:flex-end;justify-content:center;
+  height:38px;position:relative}
+.col-hint-disc{width:26px;height:26px;border-radius:50%;opacity:0;
+  transition:opacity 0.12s,transform 0.12s;transform:translateY(6px);pointer-events:none}
+.col-hint-disc.visible{opacity:0.5;transform:translateY(0)}
+.four-board{background:#0a0a10;border-radius:16px;padding:10px;
+  border:2px solid rgba(124,111,247,0.18);display:inline-flex;flex-direction:column;gap:6px}
+.four-row{display:flex;gap:6px}
+.four-cell{width:52px;height:52px;border-radius:50%;background:#1c1c2a;
+  border:1px solid rgba(255,255,255,0.03);transition:background 0.1s;position:relative}
+.four-cell.p1,.four-cell.p2{box-shadow:inset 0 -3px 0 rgba(0,0,0,0.25),0 0 8px rgba(0,0,0,0.4)}
+@keyframes dropIn{from{transform:translateY(-340px)}to{transform:translateY(0)}}
+.four-cell.dropping{animation:dropIn 0.28s cubic-bezier(0.4,0.1,0.6,0.95)}
+@keyframes winPulse{0%,100%{filter:brightness(1) saturate(1)} 50%{filter:brightness(1.7) saturate(1.3)}}
+.four-cell.win-flash{animation:winPulse 0.55s ease 3}
+.col-hover-zone:hover .col-hint-disc{opacity:0.45;transform:translateY(0)}
+
+/* TTT */
+.ttt-wrap{display:flex;flex-direction:column;align-items:center;gap:20px}
+.ttt-board{display:grid;width:fit-content;background:#0a0a10;
+  border:2px solid rgba(124,111,247,0.18);border-radius:16px;overflow:hidden}
+.ttt-cell{display:flex;align-items:center;justify-content:center;
+  cursor:pointer;background:var(--card);transition:background 0.12s;
+  border:1px solid rgba(255,255,255,0.04);user-select:none;font-weight:700;
+  font-family:var(--mono)}
+.ttt-cell:hover:not(.taken){background:#22222e}
+.ttt-cell.taken{cursor:default}
+@keyframes popIn{0%{transform:scale(0.4);opacity:0.3}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
+.ttt-cell.taken{animation:popIn 0.2s ease}
+@keyframes winGlow{0%,100%{background:rgba(94,240,160,0.06)}50%{background:rgba(94,240,160,0.18)}}
+.ttt-cell.win-line{animation:winGlow 0.5s ease 3}
+
+/* RESULT OVERLAY */
+.result-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.78);
+  backdrop-filter:blur(8px);z-index:100;display:flex;align-items:center;justify-content:center}
+.result-box{background:var(--card);border:1px solid var(--border-h);
+  border-radius:20px;padding:40px 48px;text-align:center;max-width:360px;width:90%;
+  animation:fadeUp 0.3s ease}
+.result-emoji{font-size:56px;margin-bottom:16px;display:block}
+.result-title{font-size:24px;font-weight:700;letter-spacing:-0.02em;margin-bottom:8px}
+.result-sub{font-size:14px;color:var(--muted);margin-bottom:28px}
+.result-btns{display:flex;gap:10px;justify-content:center}
+
+/* AI THINKING DOTS */
+.think-dots{display:inline-flex;gap:4px;vertical-align:middle}
+.think-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);
+  animation:blink 0.9s ease-in-out infinite}
+.think-dot:nth-child(2){animation-delay:0.2s}
+.think-dot:nth-child(3){animation-delay:0.4s}
+@keyframes blink{0%,80%,100%{opacity:0.2;transform:scale(0.7)}40%{opacity:1;transform:scale(1)}}
+
+/* TIMER BAR */
+.timer-bar-wrap{height:3px;background:var(--card2);border-radius:2px;overflow:hidden;margin-bottom:16px}
+.timer-bar{height:100%;background:var(--accent);border-radius:2px;
+  transition:width 0.9s linear,background 0.3s}
+.timer-bar.warning{background:#f97316}
+.timer-bar.danger{background:#ef4444}
+
+/* TOOLS HUB */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.tool-card{background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px 20px;cursor:pointer;transition:border-color 0.2s,transform 0.2s,box-shadow 0.2s;
+  position:relative;overflow:hidden;text-align:left}
+.tool-card::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 0%,var(--card-glow,rgba(124,111,247,0.1)) 0%,transparent 70%);
+  opacity:0;transition:opacity 0.3s}
+.tool-card:hover{border-color:var(--border-h);transform:translateY(-3px);box-shadow:0 10px 36px rgba(0,0,0,0.4)}
+.tool-card:hover::before{opacity:1}
+.tool-icon{font-size:32px;margin-bottom:12px;display:block;line-height:1}
+.tool-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.tool-desc{font-size:12px;color:var(--muted);line-height:1.4}
+
+/* SPIN THE WHEEL */
+#screen-wheel{overflow-y:auto}
+.wheel-layout{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+@media(max-width:680px){.wheel-layout{grid-template-columns:1fr}}
+.wheel-canvas-wrap{display:flex;flex-direction:column;align-items:center;gap:16px;position:sticky;top:24px}
+canvas#wheelCanvas{border-radius:50%;display:block}
+.wheel-pointer{font-size:28px;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,0.6));
+  position:absolute;top:-18px;left:50%;transform:translateX(-50%);pointer-events:none}
+.wheel-canvas-outer{position:relative;width:fit-content}
+.spin-btn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);
+  color:#fff;font-family:var(--font);font-size:16px;font-weight:700;cursor:pointer;
+  transition:background 0.15s,transform 0.1s,box-shadow 0.15s;
+  box-shadow:0 0 24px var(--accent-g)}
+.spin-btn:hover:not(:disabled){background:#8f84fa;box-shadow:0 0 36px rgba(124,111,247,0.4);transform:translateY(-1px)}
+.spin-btn:disabled{opacity:0.5;cursor:not-allowed}
+.wheel-result{background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:16px 20px;text-align:center;min-height:56px;display:flex;align-items:center;
+  justify-content:center;gap:10px;font-size:15px;font-weight:600;transition:border-color 0.3s}
+.wheel-result.lit{border-color:var(--accent);box-shadow:0 0 20px var(--accent-g)}
+.wheel-panel{display:flex;flex-direction:column;gap:14px}
+.wheel-items-list{display:flex;flex-direction:column;gap:6px;max-height:340px;overflow-y:auto}
+.wheel-item-row{display:flex;align-items:center;gap:8px;background:var(--card2);
+  border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+  transition:border-color 0.15s}
+.wheel-item-row:hover{border-color:var(--border-h)}
+.wheel-item-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.wheel-item-text{flex:1;font-size:13px;background:transparent;border:none;
+  color:var(--text);font-family:var(--font);outline:none;min-width:0}
+.wheel-item-del{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:16px;line-height:1;padding:0 2px;transition:color 0.15s;flex-shrink:0}
+.wheel-item-del:hover{color:var(--accent2)}
+.wheel-add-row{display:flex;gap:8px}
+.wheel-add-input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:8px;
+  padding:10px 13px;color:var(--text);font-family:var(--font);font-size:14px;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+.wheel-add-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-g)}
+.wheel-add-btn{background:var(--accent);border:none;border-radius:8px;color:#fff;
+  font-family:var(--font);font-size:14px;font-weight:600;padding:10px 18px;
+  cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.wheel-add-btn:hover{background:#8f84fa}
+.wheel-options-row{display:flex;gap:8px;flex-wrap:wrap}
+.wheel-opt-btn{background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  color:var(--muted);font-family:var(--font);font-size:12px;font-weight:600;
+  padding:7px 12px;cursor:pointer;transition:background 0.15s,color 0.15s,border-color 0.15s}
+.wheel-opt-btn:hover{background:rgba(124,111,247,0.12);color:var(--accent);border-color:rgba(124,111,247,0.3)}
+.history-list{display:flex;flex-direction:column;gap:4px;max-height:130px;overflow-y:auto}
+.history-row{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);padding:4px 0;
+  border-bottom:1px solid var(--border)}
+.history-row:last-child{border:none}
+.history-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.history-num{font-family:var(--mono);font-size:10px;color:rgba(240,238,255,0.25);width:18px}
+
+/* ── HANGMAN ── */
+.hangman-layout{display:grid;grid-template-columns:220px 1fr;gap:28px;align-items:start}
+@media(max-width:640px){.hangman-layout{grid-template-columns:1fr}}
+.hangman-svg-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;position:sticky;top:20px}
+#hangman-svg{width:200px;height:220px}
+.hangman-meta{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:center}
+.hangman-right{display:flex;flex-direction:column;gap:16px}
+.word-display{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:10px 0}
+.letter-slot{width:32px;height:42px;border-bottom:2px solid var(--border-h);
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;
+  font-size:20px;font-weight:700;font-family:var(--mono);transition:border-color 0.2s}
+.letter-slot.revealed{border-color:var(--accent)}
+.letter-slot.space{border-bottom:none;width:14px}
+.keyboard{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.key-btn{width:34px;height:34px;border-radius:7px;border:1px solid var(--border-h);
+  background:var(--card2);color:var(--text);font-family:var(--mono);font-size:13px;
+  font-weight:700;cursor:pointer;transition:background 0.12s,color 0.12s,border-color 0.12s,opacity 0.12s}
+.key-btn:hover:not(:disabled){background:rgba(124,111,247,0.2);border-color:var(--accent);color:var(--accent)}
+.key-btn:disabled{opacity:0.22;cursor:not-allowed;pointer-events:none}
+.key-btn.hit{background:rgba(94,240,160,0.15);border-color:rgba(94,240,160,0.35);color:var(--green);opacity:1}
+.key-btn.miss{background:rgba(247,111,168,0.1);border-color:rgba(247,111,168,0.25);color:var(--accent2);opacity:1}
+.hangman-status{text-align:center;font-size:15px;font-weight:700;padding:6px 0;min-height:32px}
+.custom-word-row{display:flex;gap:8px}
+.custom-word-input{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  padding:9px 13px;color:var(--text);font-family:var(--font);font-size:14px;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s}
+.custom-word-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-g)}
+.custom-word-btn{background:var(--accent);border:none;border-radius:8px;color:#fff;
+  font-family:var(--font);font-size:13px;font-weight:600;padding:9px 16px;cursor:pointer;transition:background 0.15s;white-space:nowrap}
+.custom-word-btn:hover{background:#8f84fa}
+.category-row{display:flex;gap:6px;flex-wrap:wrap}
+.cat-btn{background:var(--card2);border:1px solid var(--border);border-radius:7px;
+  color:var(--muted);font-family:var(--font);font-size:12px;font-weight:600;
+  padding:5px 11px;cursor:pointer;transition:background 0.12s,color 0.12s,border-color 0.12s}
+.cat-btn:hover,.cat-btn.active{background:rgba(124,111,247,0.15);color:var(--accent);border-color:rgba(124,111,247,0.3)}
+
+/* ── DICE ROLLER ── */
+.dice-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:640px){.dice-layout{grid-template-columns:1fr}}
+.dice-tray{background:#0a0a10;border:2px solid rgba(124,111,247,0.18);border-radius:16px;
+  min-height:160px;padding:20px;display:flex;flex-wrap:wrap;gap:12px;
+  align-items:center;justify-content:center}
+.die{width:60px;height:60px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:900;font-family:var(--mono);background:var(--card);
+  border:2px solid var(--border-h);color:var(--text);user-select:none;position:relative;flex-shrink:0}
+.die.rolling{animation:dieRoll 0.45s ease}
+@keyframes dieRoll{0%{transform:rotate(0) scale(1)}30%{transform:rotate(-18deg) scale(1.12)}70%{transform:rotate(14deg) scale(0.94)}100%{transform:rotate(0) scale(1)}}
+.dice-controls{display:flex;flex-direction:column;gap:14px}
+.dice-type-row{display:flex;gap:7px;flex-wrap:wrap}
+.dice-type-btn{padding:8px 13px;border-radius:9px;border:1px solid var(--border-h);
+  background:var(--card2);color:var(--muted);font-family:var(--mono);font-size:13px;font-weight:700;
+  cursor:pointer;transition:background 0.12s,color 0.12s,border-color 0.12s}
+.dice-type-btn:hover,.dice-type-btn.active{background:rgba(124,111,247,0.18);color:var(--accent);border-color:rgba(124,111,247,0.4)}
+.dice-count-row{display:flex;align-items:center;gap:12px}
+.dice-count-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--border-h);
+  background:var(--card2);color:var(--text);font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:background 0.12s;font-family:var(--font)}
+.dice-count-btn:hover:not(:disabled){background:rgba(255,255,255,0.08)}
+.dice-count-btn:disabled{opacity:0.3;cursor:not-allowed}
+.dice-count-val{font-size:18px;font-weight:700;min-width:28px;text-align:center;font-family:var(--mono)}
+.roll-btn{width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);
+  color:#fff;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;
+  transition:background 0.15s,transform 0.1s;box-shadow:0 0 24px var(--accent-g)}
+.roll-btn:hover:not(:disabled){background:#8f84fa;transform:translateY(-1px)}
+.roll-btn:disabled{opacity:0.5;cursor:not-allowed}
+.dice-total{text-align:center;font-size:32px;font-weight:700;font-family:var(--mono);color:var(--accent);padding:6px 0}
+.dice-total-label{font-size:11px;color:var(--muted);text-align:center;font-family:var(--mono)}
+.dice-history-row{font-family:var(--mono);font-size:12px;color:var(--muted);
+  padding:4px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px}
+.dice-history-row:last-child{border:none}
+.dice-breakdown{font-size:11px;color:rgba(240,238,255,0.3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+
+/* ANIMS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.anim-in{opacity:0;animation:fadeUp 0.45s ease forwards}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- ═══ INTRO ═══ -->
+<div id="screen-intro" class="screen active">
+  <div class="floaters">
+    <span class="floater f1">4-in-a-row</span><span class="floater f2">Mastermind</span>
+    <span class="floater f3">Word Guess</span><span class="floater f4">Tic Tac Toe</span>
+    <span class="floater f5">Trivia</span>
+  </div>
+  <div class="intro-inner">
+    <p class="eyebrow">🎮 Your personal game room</p>
+    <h1 class="logo"><span class="logo-line1">All-you-can</span><span class="logo-line2">Play.</span></h1>
+    <p class="tagline">Pick a game. Invite a friend. No accounts needed.</p>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="showScreen('create')">Create room</button>
+      <button class="btn btn-secondary" onclick="showScreen('join')">Join game</button>
+      <button class="btn btn-secondary" onclick="showScreen('tools')" style="border-color:rgba(124,111,247,0.4);color:var(--accent)">🛠 Tools</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CREATE — PICK GAME ═══ -->
+<div id="screen-create" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('intro')">← Back</button>
+  </nav>
+  <div class="inner">
+    <h2 class="page-title anim-in">Pick a game</h2>
+    <p class="page-sub anim-in" style="animation-delay:.07s">Choose what to play — you'll set up the room next.</p>
+    <div class="game-grid">
+      <div class="game-card anim-in" style="animation-delay:.1s;--card-glow:rgba(124,111,247,0.15)" onclick="openSettings('four')">
+        <span class="card-badge badge-ready">Ready</span><span class="card-icon">🔴</span>
+        <p class="card-name">4 in a Row</p><p class="card-desc">Drop discs, connect four.</p>
+      </div>
+      <div class="game-card anim-in" style="animation-delay:.16s;--card-glow:rgba(247,111,168,0.12)" onclick="openSettings('ttt')">
+        <span class="card-badge badge-ready">Ready</span><span class="card-icon">⭕</span>
+        <p class="card-name">Tic Tac Toe</p><p class="card-desc">First to get three in a row wins.</p>
+      </div>
+      <div class="game-card anim-in" style="animation-delay:.22s;--card-glow:rgba(94,240,160,0.1)" onclick="openSettings('hangman')">
+        <span class="card-badge badge-ready">Ready</span><span class="card-icon">🪢</span>
+        <p class="card-name">Hangman</p><p class="card-desc">Guess the word before the man hangs.</p>
+      </div>
+      <div class="game-card disabled anim-in" style="animation-delay:.28s"><span class="card-badge badge-soon">Soon</span><span class="card-icon">🔐</span><p class="card-name">Mastermind</p><p class="card-desc">Crack the code.</p></div>
+      <div class="game-card disabled anim-in" style="animation-delay:.34s"><span class="card-badge badge-soon">Soon</span><span class="card-icon">✏️</span><p class="card-name">Word Guess</p><p class="card-desc">Wordle-style.</p></div>
+      <div class="game-card disabled anim-in" style="animation-delay:.4s"><span class="card-badge badge-soon">Soon</span><span class="card-icon">🧠</span><p class="card-name">Trivia</p><p class="card-desc">Race to answer fastest.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS — 4 IN A ROW ═══ -->
+<div id="screen-settings-four" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
+  </nav>
+  <div class="inner">
+    <div class="game-header anim-in">
+      <span class="game-header-icon">🔴</span>
+      <div><p class="game-header-name">4 in a Row</p><p class="game-header-desc">Drop discs and connect four in a line to win.</p></div>
+    </div>
+    <div class="settings-wrap">
+      <div class="settings-col">
+        <div class="settings-block anim-in" style="animation-delay:.08s">
+          <p class="block-title">Room settings</p>
+          <div class="field">
+            <label>Room name</label>
+            <input type="text" id="four-room-name" placeholder="e.g. Jelle's room" maxlength="32"/>
+          </div>
+          <div class="field">
+            <label>Room code</label>
+            <div class="code-display">
+              <span class="code-val" id="four-code">——————</span>
+              <button class="copy-btn" onclick="copyCode('four-code')">Copy</button>
+            </div>
+            <span class="hint">Share with friends to join directly.</span>
+          </div>
+          <div class="field">
+            <div class="toggle-row">
+              <div><p class="toggle-label">Private room</p><p class="toggle-sub">Hidden from public lobby</p></div>
+              <label class="toggle"><input type="checkbox" id="four-private"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Players <span class="p-range">(always 2)</span></label>
+            <div class="player-picker">
+              <button class="p-btn" disabled>−</button><span class="p-val">2</span><button class="p-btn" disabled>+</button>
+            </div>
+            <span class="hint">4 in a Row is always 2 players.</span>
+          </div>
+          <div class="field">
+            <label>Opponent</label>
+            <div class="seg" id="four-opp-seg">
+              <button class="seg-opt active" onclick="setSeg('four-opp-seg',this,'four-opp','ai')">vs AI</button>
+              <button class="seg-opt" onclick="setSeg('four-opp-seg',this,'four-opp','local')">Pass &amp; Play</button>
+            </div>
+            <span class="hint" id="four-opp-hint">AI takes its turn automatically.</span>
+          </div>
+        </div>
+      </div>
+      <div class="settings-col">
+        <div class="settings-block anim-in" style="animation-delay:.14s">
+          <p class="block-title">Game settings</p>
+          <div class="field">
+            <label>Board size</label>
+            <div class="seg" id="four-board-seg">
+              <button class="seg-opt active" onclick="setSeg('four-board-seg',this,'four-board','6x7')">6 × 7</button>
+              <button class="seg-opt" onclick="setSeg('four-board-seg',this,'four-board','7x8')">7 × 8</button>
+              <button class="seg-opt" onclick="setSeg('four-board-seg',this,'four-board','8x9')">8 × 9</button>
+            </div>
+            <span class="hint">Rows × Columns. Standard is 6 × 7.</span>
+          </div>
+          <div class="field">
+            <label>Win condition</label>
+            <div class="seg" id="four-win-seg">
+              <button class="seg-opt active" onclick="setSeg('four-win-seg',this,'four-win','4')">4 in a row</button>
+              <button class="seg-opt" onclick="setSeg('four-win-seg',this,'four-win','5')">5 in a row</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Time limit per turn</label>
+            <div class="seg" id="four-time-seg">
+              <button class="seg-opt active" onclick="setSeg('four-time-seg',this,'four-time','0')">None</button>
+              <button class="seg-opt" onclick="setSeg('four-time-seg',this,'four-time','30')">30s</button>
+              <button class="seg-opt" onclick="setSeg('four-time-seg',this,'four-time','60')">60s</button>
+            </div>
+          </div>
+          <div class="field">
+            <div class="toggle-row">
+              <div><p class="toggle-label">Mouse hover preview</p><p class="toggle-sub">Floating disc shows where you'll drop</p></div>
+              <label class="toggle"><input type="checkbox" id="four-hover" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
+        </div>
+        <div class="settings-block anim-in" style="animation-delay:.2s">
+          <p class="block-title">Disc colours</p>
+          <div class="field" style="margin-bottom:14px">
+            <label>Player 1</label>
+            <div class="color-row" id="four-p1-colors">
+              <div class="color-chip selected" style="background:#ef4444" data-color="#ef4444" onclick="pickColor('four-p1-colors','four-p2-colors',this)"></div>
+              <div class="color-chip" style="background:#f97316" data-color="#f97316" onclick="pickColor('four-p1-colors','four-p2-colors',this)"></div>
+              <div class="color-chip" style="background:#eab308" data-color="#eab308" onclick="pickColor('four-p1-colors','four-p2-colors',this)"></div>
+              <div class="color-chip" style="background:#22c55e" data-color="#22c55e" onclick="pickColor('four-p1-colors','four-p2-colors',this)"></div>
+              <div class="color-chip" style="background:#3b82f6" data-color="#3b82f6" onclick="pickColor('four-p1-colors','four-p2-colors',this)"></div>
+              <div class="color-chip" style="background:#a855f7" data-color="#a855f7" onclick="pickColor('four-p1-colors','four-p2-colors',this)"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Player 2</label>
+            <div class="color-row" id="four-p2-colors">
+              <div class="color-chip blocked" style="background:#ef4444" data-color="#ef4444" onclick="pickColor('four-p2-colors','four-p1-colors',this)"></div>
+              <div class="color-chip" style="background:#f97316" data-color="#f97316" onclick="pickColor('four-p2-colors','four-p1-colors',this)"></div>
+              <div class="color-chip selected" style="background:#eab308" data-color="#eab308" onclick="pickColor('four-p2-colors','four-p1-colors',this)"></div>
+              <div class="color-chip" style="background:#22c55e" data-color="#22c55e" onclick="pickColor('four-p2-colors','four-p1-colors',this)"></div>
+              <div class="color-chip" style="background:#3b82f6" data-color="#3b82f6" onclick="pickColor('four-p2-colors','four-p1-colors',this)"></div>
+              <div class="color-chip" style="background:#a855f7" data-color="#a855f7" onclick="pickColor('four-p2-colors','four-p1-colors',this)"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-actions anim-in" style="animation-delay:.26s">
+      <button class="btn-cancel" onclick="showScreen('create')">Cancel</button>
+      <button class="btn-create" onclick="startGame('four')">Create room →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS — TIC TAC TOE ═══ -->
+<div id="screen-settings-ttt" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
+  </nav>
+  <div class="inner">
+    <div class="game-header anim-in">
+      <span class="game-header-icon">⭕</span>
+      <div><p class="game-header-name">Tic Tac Toe</p><p class="game-header-desc">First to get three in a row wins.</p></div>
+    </div>
+    <div class="settings-wrap">
+      <div class="settings-col">
+        <div class="settings-block anim-in" style="animation-delay:.08s">
+          <p class="block-title">Room settings</p>
+          <div class="field">
+            <label>Room name</label>
+            <input type="text" id="ttt-room-name" placeholder="e.g. Quick match" maxlength="32"/>
+          </div>
+          <div class="field">
+            <label>Room code</label>
+            <div class="code-display">
+              <span class="code-val" id="ttt-code">——————</span>
+              <button class="copy-btn" onclick="copyCode('ttt-code')">Copy</button>
+            </div>
+            <span class="hint">Share with friends to join directly.</span>
+          </div>
+          <div class="field">
+            <div class="toggle-row">
+              <div><p class="toggle-label">Private room</p><p class="toggle-sub">Hidden from public lobby</p></div>
+              <label class="toggle"><input type="checkbox" id="ttt-private"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Players <span class="p-range">(always 2)</span></label>
+            <div class="player-picker">
+              <button class="p-btn" disabled>−</button><span class="p-val">2</span><button class="p-btn" disabled>+</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Opponent</label>
+            <div class="seg" id="ttt-opp-seg">
+              <button class="seg-opt active" onclick="setSeg('ttt-opp-seg',this,'ttt-opp','ai')">vs AI</button>
+              <button class="seg-opt" onclick="setSeg('ttt-opp-seg',this,'ttt-opp','local')">Pass &amp; Play</button>
+            </div>
+            <span class="hint" id="ttt-opp-hint">AI takes its turn automatically.</span>
+          </div>
+        </div>
+      </div>
+      <div class="settings-col">
+        <div class="settings-block anim-in" style="animation-delay:.14s">
+          <p class="block-title">Game settings</p>
+          <div class="field">
+            <label>Grid size</label>
+            <div class="seg" id="ttt-grid-seg">
+              <button class="seg-opt active" onclick="setSeg('ttt-grid-seg',this,'ttt-grid','3')">3 × 3</button>
+              <button class="seg-opt" onclick="setSeg('ttt-grid-seg',this,'ttt-grid','4')">4 × 4</button>
+              <button class="seg-opt" onclick="setSeg('ttt-grid-seg',this,'ttt-grid','5')">5 × 5</button>
+            </div>
+            <span class="hint">Larger grids are harder to win.</span>
+          </div>
+          <div class="field">
+            <label>First move</label>
+            <div class="seg" id="ttt-first-seg">
+              <button class="seg-opt active" onclick="setSeg('ttt-first-seg',this,'ttt-first','1')">P1 goes first</button>
+              <button class="seg-opt" onclick="setSeg('ttt-first-seg',this,'ttt-first','random')">Random</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Series</label>
+            <div class="seg" id="ttt-bo-seg">
+              <button class="seg-opt active" onclick="setSeg('ttt-bo-seg',this,'ttt-bo','1')">1 game</button>
+              <button class="seg-opt" onclick="setSeg('ttt-bo-seg',this,'ttt-bo','3')">Best of 3</button>
+              <button class="seg-opt" onclick="setSeg('ttt-bo-seg',this,'ttt-bo','5')">Best of 5</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Time limit per turn</label>
+            <div class="seg" id="ttt-time-seg">
+              <button class="seg-opt active" onclick="setSeg('ttt-time-seg',this,'ttt-time','0')">None</button>
+              <button class="seg-opt" onclick="setSeg('ttt-time-seg',this,'ttt-time','15')">15s</button>
+              <button class="seg-opt" onclick="setSeg('ttt-time-seg',this,'ttt-time','30')">30s</button>
+            </div>
+          </div>
+        </div>
+        <div class="settings-block anim-in" style="animation-delay:.2s">
+          <p class="block-title">Symbols</p>
+          <div class="field" style="margin-bottom:12px">
+            <label>Player 1</label>
+            <div class="seg" id="ttt-sym1-seg">
+              <button class="seg-opt active" onclick="setSeg('ttt-sym1-seg',this,'ttt-sym1','✕')">✕</button>
+              <button class="seg-opt" onclick="setSeg('ttt-sym1-seg',this,'ttt-sym1','△')">△</button>
+              <button class="seg-opt" onclick="setSeg('ttt-sym1-seg',this,'ttt-sym1','★')">★</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Player 2</label>
+            <div class="seg" id="ttt-sym2-seg">
+              <button class="seg-opt active" onclick="setSeg('ttt-sym2-seg',this,'ttt-sym2','○')">○</button>
+              <button class="seg-opt" onclick="setSeg('ttt-sym2-seg',this,'ttt-sym2','◇')">◇</button>
+              <button class="seg-opt" onclick="setSeg('ttt-sym2-seg',this,'ttt-sym2','♥')">♥</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-actions anim-in" style="animation-delay:.26s">
+      <button class="btn-cancel" onclick="showScreen('create')">Cancel</button>
+      <button class="btn-create" onclick="startGame('ttt')">Create room →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETTINGS — HANGMAN ═══ -->
+<div id="screen-settings-hangman" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
+  </nav>
+  <div class="inner">
+    <div class="game-header anim-in">
+      <span class="game-header-icon">🪢</span>
+      <div><p class="game-header-name">Hangman</p><p class="game-header-desc">Guess the hidden word before the man is hung.</p></div>
+    </div>
+    <div class="settings-wrap">
+      <div class="settings-col">
+        <div class="settings-block anim-in" style="animation-delay:.08s">
+          <p class="block-title">Room settings</p>
+          <div class="field">
+            <label>Room name</label>
+            <input type="text" id="hm-room-name" placeholder="e.g. Word night" maxlength="32"/>
+          </div>
+          <div class="field">
+            <label>Room code</label>
+            <div class="code-display">
+              <span class="code-val" id="hm-code">——————</span>
+              <button class="copy-btn" onclick="copyCode('hm-code')">Copy</button>
+            </div>
+            <span class="hint">Share this so friends can join directly.</span>
+          </div>
+          <div class="field">
+            <div class="toggle-row">
+              <div><p class="toggle-label">Private room</p><p class="toggle-sub">Hidden from public lobby</p></div>
+              <label class="toggle"><input type="checkbox" id="hm-private"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Players <span class="p-range">(2 – 8)</span></label>
+            <div class="player-picker">
+              <button class="p-btn" id="hm-p-dec" onclick="hmChangeP(-1)">−</button>
+              <span class="p-val" id="hm-p-val">2</span>
+              <button class="p-btn" id="hm-p-inc" onclick="hmChangeP(1)">+</button>
+            </div>
+            <span class="hint">One sets the word, the rest guess together.</span>
+          </div>
+        </div>
+      </div>
+      <div class="settings-col">
+        <div class="settings-block anim-in" style="animation-delay:.14s">
+          <p class="block-title">Game settings</p>
+          <div class="field">
+            <label>Word source</label>
+            <div class="seg" id="hm-source-seg">
+              <button class="seg-opt active" onclick="setSeg('hm-source-seg',this,'hm-source','random');hmUpdateSourceHint()">Random</button>
+              <button class="seg-opt" onclick="setSeg('hm-source-seg',this,'hm-source','custom');hmUpdateSourceHint()">Custom word</button>
+            </div>
+            <span class="hint" id="hm-source-hint">A word is picked from the selected category.</span>
+          </div>
+          <div class="field" id="hm-category-field">
+            <label>Category</label>
+            <div class="seg" id="hm-cat-seg" style="flex-wrap:wrap;height:auto;gap:4px">
+              <button class="seg-opt active" style="flex:none;padding:6px 10px" onclick="setSeg('hm-cat-seg',this,'hm-category','random')">🎲 All</button>
+              <button class="seg-opt" style="flex:none;padding:6px 10px" onclick="setSeg('hm-cat-seg',this,'hm-category','animals')">🐘 Animals</button>
+              <button class="seg-opt" style="flex:none;padding:6px 10px" onclick="setSeg('hm-cat-seg',this,'hm-category','countries')">🌍 Countries</button>
+              <button class="seg-opt" style="flex:none;padding:6px 10px" onclick="setSeg('hm-cat-seg',this,'hm-category','food')">🍕 Food</button>
+              <button class="seg-opt" style="flex:none;padding:6px 10px" onclick="setSeg('hm-cat-seg',this,'hm-category','tech')">💻 Tech</button>
+              <button class="seg-opt" style="flex:none;padding:6px 10px" onclick="setSeg('hm-cat-seg',this,'hm-category','sports')">⚽ Sports</button>
+              <button class="seg-opt" style="flex:none;padding:6px 10px" onclick="setSeg('hm-cat-seg',this,'hm-category','movies')">🎬 Movies</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Max wrong guesses</label>
+            <div class="seg" id="hm-guesses-seg">
+              <button class="seg-opt" onclick="setSeg('hm-guesses-seg',this,'hm-maxwrong','5')">5</button>
+              <button class="seg-opt active" onclick="setSeg('hm-guesses-seg',this,'hm-maxwrong','6')">6</button>
+              <button class="seg-opt" onclick="setSeg('hm-guesses-seg',this,'hm-maxwrong','8')">8</button>
+              <button class="seg-opt" onclick="setSeg('hm-guesses-seg',this,'hm-maxwrong','10')">10</button>
+            </div>
+            <span class="hint">6 is classic. More = easier.</span>
+          </div>
+          <div class="field">
+            <label>Show word length hint</label>
+            <div class="toggle-row" style="margin-top:4px">
+              <div><p class="toggle-sub" style="font-size:13px;color:var(--text)">Reveal number of letters upfront</p></div>
+              <label class="toggle"><input type="checkbox" id="hm-hint-toggle" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Rounds</label>
+            <div class="seg" id="hm-rounds-seg">
+              <button class="seg-opt active" onclick="setSeg('hm-rounds-seg',this,'hm-rounds','1')">1</button>
+              <button class="seg-opt" onclick="setSeg('hm-rounds-seg',this,'hm-rounds','3')">3</button>
+              <button class="seg-opt" onclick="setSeg('hm-rounds-seg',this,'hm-rounds','5')">5</button>
+            </div>
+            <span class="hint">Each round a new word is guessed.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-actions anim-in" style="animation-delay:.22s">
+      <button class="btn-cancel" onclick="showScreen('create')">Cancel</button>
+      <button class="btn-create" onclick="startHangman()">Create room →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ HANGMAN — SET WORD ═══ -->
+<div id="screen-hangman-setword" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('settings-hangman')">← Settings</button>
+  </nav>
+  <div class="inner" style="max-width:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">🪢</div>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:8px">Set the secret word</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:32px">Type your word below. Pass the device to the guesser when done — they won't see it.</p>
+    <div class="settings-block" style="width:100%;padding:24px;text-align:left">
+      <div class="field">
+        <label>Secret word or phrase</label>
+        <input type="password" id="hm-secret-input" class="custom-word-input" placeholder="Type your word…" maxlength="30" autocomplete="off" style="width:100%;font-size:18px;letter-spacing:0.08em"
+          onkeydown="if(event.key==='Enter') hmConfirmWord()"/>
+      </div>
+      <div id="hm-setword-hint" style="font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:2px"></div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:20px;width:100%">
+      <button class="btn-cancel" style="flex:1" onclick="showScreen('settings-hangman')">Back</button>
+      <button class="btn-create" style="flex:2" onclick="hmConfirmWord()">Start game →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ JOIN ═══ -->
+<div id="screen-join" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('intro')">← Back</button>
+  </nav>
+  <div class="inner">
+    <h2 class="page-title anim-in">Join a game</h2>
+    <p class="page-sub anim-in" style="animation-delay:.07s">Jump into an open room or enter a private code.</p>
+    <p class="section-label anim-in" style="animation-delay:.12s">Open rooms</p>
+    <div class="rooms-list anim-in" style="animation-delay:.17s">
+      <div class="room-card"><div><p class="room-name">Jelle's room</p><div class="room-meta"><span>4 in a Row</span><span>1 / 2 players</span></div></div><div class="room-right"><div class="dot dot-green"></div><button class="join-pill">Join</button></div></div>
+      <div class="room-card"><div><p class="room-name">Word night</p><div class="room-meta"><span>Hangman · Animals</span><span>1 / 3 players</span></div></div><div class="room-right"><div class="dot dot-green"></div><button class="join-pill">Join</button></div></div>
+      <div class="room-card"><div><p class="room-name">Quick match</p><div class="room-meta"><span>Tic Tac Toe</span><span>1 / 2 players</span></div></div><div class="room-right"><div class="dot dot-yellow"></div><button class="join-pill">Join</button></div></div>
+    </div>
+    <div class="divider anim-in" style="animation-delay:.24s">or join with a code</div>
+    <div class="code-row anim-in" style="animation-delay:.3s">
+      <input class="code-input" id="code-in" maxlength="6" placeholder="Enter 6-letter code…"/>
+      <button class="btn-join-code">Join room</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GAME ═══ -->
+<div id="screen-game" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <span id="game-nav-center" style="font-family:var(--mono);font-size:12px;color:var(--muted)"></span>
+    <button class="nav-back" onclick="confirmQuit()">Quit</button>
+  </nav>
+  <div class="game-area">
+    <div class="game-status-bar">
+      <div class="player-tag" id="p1-tag">
+        <div class="player-disc" id="p1-disc-tag"></div>
+        <span id="p1-label">Player 1</span>
+      </div>
+      <div class="status-center" id="status-msg">—</div>
+      <div class="player-tag right" id="p2-tag">
+        <span id="p2-label">Player 2</span>
+        <div class="player-disc" id="p2-disc-tag"></div>
+      </div>
+    </div>
+    <div class="timer-bar-wrap" id="timer-bar-wrap" style="display:none">
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
+    <div id="game-board-container" style="display:flex;justify-content:center;align-items:flex-start;flex:1;padding-top:8px"></div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="result-overlay" class="result-overlay" style="display:none">
+  <div class="result-box">
+    <span class="result-emoji" id="result-emoji">🎉</span>
+    <p class="result-title" id="result-title">Player 1 wins!</p>
+    <p class="result-sub" id="result-sub">Well played.</p>
+    <div class="result-btns">
+      <button class="btn-cancel" onclick="rematch()">Play again</button>
+      <button class="btn-create" onclick="showScreen('intro')">Main menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOOLS HUB ═══ -->
+<div id="screen-tools" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('intro')">← Back</button>
+  </nav>
+  <div class="inner">
+    <h2 class="page-title anim-in">Tools</h2>
+    <p class="page-sub anim-in" style="animation-delay:.07s">Handy utilities for game nights and group decisions.</p>
+    <div class="tools-grid">
+      <div class="tool-card anim-in" style="animation-delay:.1s;--card-glow:rgba(247,199,111,0.12)" onclick="showScreen('wheel')">
+        <span class="tool-icon">🎡</span>
+        <p class="tool-name">Spin the Wheel</p>
+        <p class="tool-desc">Add names or items, spin, and let fate decide.</p>
+      </div>
+      <div class="tool-card anim-in" style="animation-delay:.16s;--card-glow:rgba(94,240,160,0.1)" onclick="showScreen('dice')">
+        <span class="tool-icon">🎲</span>
+        <p class="tool-name">Dice Roller</p>
+        <p class="tool-desc">Roll any number of dice with custom sides.</p>
+      </div>
+      <div class="tool-card anim-in" style="animation-delay:.22s;--card-glow:rgba(124,111,247,0.1);opacity:0.45;cursor:not-allowed">
+        <span class="tool-icon">⏱</span>
+        <p class="tool-name">Countdown Timer</p>
+        <p class="tool-desc">Set a timer for turns, breaks, or challenges.</p>
+        <span class="card-badge badge-soon" style="position:absolute;top:11px;right:11px">Soon</span>
+      </div>
+      <div class="tool-card anim-in" style="animation-delay:.28s;--card-glow:rgba(247,111,168,0.1);opacity:0.45;cursor:not-allowed">
+        <span class="tool-icon">🃏</span>
+        <p class="tool-name">Card Draw</p>
+        <p class="tool-desc">Draw from a custom deck or a standard 52-card deck.</p>
+        <span class="card-badge badge-soon" style="position:absolute;top:11px;right:11px">Soon</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SPIN THE WHEEL ═══ -->
+<div id="screen-wheel" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('tools')">← Back to tools</button>
+  </nav>
+  <div class="inner" style="max-width:960px">
+    <h2 class="page-title anim-in">🎡 Spin the Wheel</h2>
+    <p class="page-sub anim-in" style="animation-delay:.06s">Add names or items, then spin to pick one at random.</p>
+    <div class="wheel-layout anim-in" style="animation-delay:.1s">
+      <!-- LEFT: wheel canvas -->
+      <div class="wheel-canvas-wrap">
+        <div class="wheel-canvas-outer">
+          <canvas id="wheelCanvas" width="340" height="340"></canvas>
+          <span class="wheel-pointer">▼</span>
+        </div>
+        <div class="wheel-result" id="wheel-result">
+          <span style="color:var(--muted)">Spin the wheel to get a result</span>
+        </div>
+        <button class="spin-btn" id="spin-btn" onclick="spinWheel()">Spin!</button>
+      </div>
+      <!-- RIGHT: controls -->
+      <div class="wheel-panel">
+        <div class="settings-block" style="padding:18px 18px 14px">
+          <p class="block-title">Items on the wheel</p>
+          <div class="wheel-items-list" id="wheel-items-list"></div>
+          <div class="wheel-add-row" style="margin-top:10px">
+            <input class="wheel-add-input" id="wheel-add-input" placeholder="Add name or item…" maxlength="40"
+              onkeydown="if(event.key==='Enter') addWheelItem()"/>
+            <button class="wheel-add-btn" onclick="addWheelItem()">Add</button>
+          </div>
+        </div>
+        <div class="settings-block" style="padding:18px">
+          <p class="block-title">Quick presets</p>
+          <div class="wheel-options-row">
+            <button class="wheel-opt-btn" onclick="loadPreset('yesno')">Yes / No</button>
+            <button class="wheel-opt-btn" onclick="loadPreset('players')">Player 1–4</button>
+            <button class="wheel-opt-btn" onclick="loadPreset('games')">Pick a game</button>
+            <button class="wheel-opt-btn" onclick="clearWheel()" style="color:var(--accent2);border-color:rgba(247,111,168,0.2)">Clear all</button>
+          </div>
+        </div>
+        <div class="settings-block" style="padding:18px" id="history-block">
+          <p class="block-title">Spin history</p>
+          <div class="history-list" id="history-list">
+            <span style="font-size:12px;color:var(--muted)">No spins yet.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+const S = {
+  game: null, opponent: 'ai',
+  p1color: '#ef4444', p2color: '#eab308',
+  p1sym: '✕', p2sym: '○',
+  rows: 6, cols: 7, winLen: 4,
+  tttGrid: 3, boTarget: 1,
+  timeLimit: 0, hoverEnabled: true,
+  currentPlayer: 1, scores: [0,0], gamesPlayed: 0,
+  board: [], timerInterval: null, timeLeft: 0,
+  aiThinking: false, gameOver: false
+};
+
+const cfg = {
+  'four-opp': 'ai', 'four-board': '6x7', 'four-win': '4',
+  'four-time': '0', 'four-p1-colors': '#ef4444', 'four-p2-colors': '#eab308',
+  'ttt-opp': 'ai', 'ttt-grid': '3', 'ttt-bo': '1',
+  'ttt-first': '1', 'ttt-time': '0',
+  'ttt-sym1': '✕', 'ttt-sym2': '○',
+  'hm-source': 'random', 'hm-category': 'random', 'hm-maxwrong': '6',
+  'hm-rounds': '1'
+};
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const t = document.getElementById('screen-' + id);
+  if (!t) return;
+  t.classList.add('active');
+  t.querySelectorAll('.anim-in').forEach(el => {
+    el.style.animation = 'none'; void el.offsetWidth; el.style.animation = '';
+  });
+  if (id === 'wheel') requestAnimationFrame(drawWheel);
+  if (id === 'hangman') hmInitKeyboard();
+  if (id === 'dice') { diceUpdateDisplay(); diceRenderHistory(); }
+}
+
+function hmInitKeyboard() {
+  const kb = document.getElementById('hm-keyboard');
+  if (!kb) return;
+  kb.innerHTML = ''; // always rebuild fresh
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(l => {
+    const btn = document.createElement('button');
+    btn.className = 'key-btn'; btn.textContent = l; btn.dataset.letter = l;
+    btn.onclick = () => hmGuess(l);
+    kb.appendChild(btn);
+  });
+}
+
+function hmSetCategory(cat, btn) {
+  HM.category = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+}
+
+function genCode() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  return Array.from({length:6}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
+
+function openSettings(game) {
+  const codeId = game === 'hangman' ? 'hm-code' : game + '-code';
+  const codeEl = document.getElementById(codeId);
+  if (codeEl) codeEl.textContent = genCode();
+  showScreen('settings-' + game);
+}
+
+function copyCode(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.textContent).catch(()=>{});
+  const btn = el.nextElementSibling;
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  btn.style.cssText = 'background:rgba(94,240,160,0.18);color:#5ef0a0;border-color:rgba(94,240,160,0.3)';
+  setTimeout(() => { btn.textContent = orig; btn.style.cssText = ''; }, 1800);
+}
+
+function setSeg(groupId, btn, key, val) {
+  document.getElementById(groupId).querySelectorAll('.seg-opt').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (key) cfg[key] = val;
+  if (key === 'four-opp' || key === 'ttt-opp') {
+    const prefix = key.split('-')[0];
+    document.getElementById(prefix+'-opp-hint').textContent =
+      val === 'ai' ? 'AI takes its turn automatically.' : 'Two people share this device.';
+  }
+}
+
+function pickColor(myGroup, otherGroup, chip) {
+  if (chip.classList.contains('blocked')) return;
+  const color = chip.dataset.color;
+  document.getElementById(myGroup).querySelectorAll('.color-chip').forEach(c => c.classList.remove('selected'));
+  chip.classList.add('selected');
+  cfg[myGroup] = color;
+  document.getElementById(otherGroup).querySelectorAll('.color-chip').forEach(c => {
+    if (c.dataset.color === color) {
+      if (c.classList.contains('selected')) {
+        const fallback = document.getElementById(otherGroup).querySelector('.color-chip:not([data-color="'+color+'"])');
+        if (fallback) { fallback.classList.add('selected'); cfg[otherGroup] = fallback.dataset.color; }
+        c.classList.remove('selected');
+      }
+      c.classList.add('blocked');
+    } else {
+      c.classList.remove('blocked');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════
+//  START GAME
+// ═══════════════════════════════════════════
+function startGame(game) {
+  S.game = game;
+  S.gameOver = false;
+  S.scores = [0,0];
+  S.gamesPlayed = 0;
+
+  if (game === 'four') {
+    S.opponent    = cfg['four-opp'];
+    S.p1color     = cfg['four-p1-colors'];
+    S.p2color     = cfg['four-p2-colors'];
+    const bs      = cfg['four-board'].split('x');
+    S.rows        = parseInt(bs[0]);
+    S.cols        = parseInt(bs[1]);
+    S.winLen      = parseInt(cfg['four-win']);
+    S.timeLimit   = parseInt(cfg['four-time']);
+    S.hoverEnabled = document.getElementById('four-hover').checked;
+    S.boTarget    = 1;
+    S.currentPlayer = 1;
+  } else {
+    S.opponent    = cfg['ttt-opp'];
+    S.p1color     = '#7c6ff7';
+    S.p2color     = '#f76fa8';
+    S.p1sym       = cfg['ttt-sym1'];
+    S.p2sym       = cfg['ttt-sym2'];
+    S.tttGrid     = parseInt(cfg['ttt-grid']);
+    S.winLen      = S.tttGrid === 3 ? 3 : 4; // 4x4 needs 4, 5x5 needs 4
+    S.boTarget    = parseInt(cfg['ttt-bo']);
+    S.timeLimit   = parseInt(cfg['ttt-time']);
+    const first   = cfg['ttt-first'];
+    S.currentPlayer = first === 'random' ? (Math.random() < 0.5 ? 1 : 2) : 1;
+  }
+
+  setupStatusBar();
+  showScreen('game');
+  initRound();
+}
+
+function setupStatusBar() {
+  const p1d = document.getElementById('p1-disc-tag');
+  const p2d = document.getElementById('p2-disc-tag');
+  if (S.game === 'four') {
+    p1d.style.cssText = `background:${S.p1color};width:18px;height:18px;border-radius:50%;border:none`;
+    p2d.style.cssText = `background:${S.p2color};width:18px;height:18px;border-radius:50%;border:none`;
+    p1d.textContent = '';
+    p2d.textContent = '';
+  } else {
+    p1d.style.cssText = `color:${S.p1color};font-size:16px;font-weight:700;width:auto;height:auto;background:none;border:none;border-radius:0`;
+    p1d.textContent = S.p1sym;
+    p2d.style.cssText = `color:${S.p2color};font-size:16px;font-weight:700;width:auto;height:auto;background:none;border:none;border-radius:0`;
+    p2d.textContent = S.p2sym;
+  }
+  document.getElementById('p1-label').textContent = 'Player 1';
+  document.getElementById('p2-label').textContent = S.opponent === 'ai' ? 'AI' : 'Player 2';
+  document.getElementById('game-nav-center').textContent =
+    S.boTarget > 1 ? `Best of ${S.boTarget}` : '';
+}
+
+function updateStatus() {
+  const msg = document.getElementById('status-msg');
+  if (S.gameOver) return;
+  if (S.aiThinking) {
+    msg.innerHTML = `AI thinking <span class="think-dots"><span class="think-dot"></span><span class="think-dot"></span><span class="think-dot"></span></span>`;
+    msg.className = 'status-center';
+    return;
+  }
+  const isP1 = S.currentPlayer === 1;
+  const name = isP1 ? 'Player 1' : (S.opponent === 'ai' ? 'AI' : 'Player 2');
+  msg.textContent = isP1 ? '⬆ Your turn' : `${name}'s turn`;
+  msg.className = 'status-center' + (isP1 ? ' active-turn' : '');
+}
+
+// ═══════════════════════════════════════════
+//  ROUND INIT
+// ═══════════════════════════════════════════
+function initRound() {
+  clearInterval(S.timerInterval);
+  S.gameOver = false;
+  S.aiThinking = false;
+  document.getElementById('result-overlay').style.display = 'none';
+  if (S.game === 'four') buildFourBoard();
+  else buildTTTBoard();
+  updateStatus();
+  startTimer();
+  if (S.opponent === 'ai' && S.currentPlayer === 2) {
+    if (S.game === 'four') scheduleAIFour();
+    else scheduleAITTT();
+  }
+}
+
+// ═══════════════════════════════════════════
+//  4 IN A ROW
+// ═══════════════════════════════════════════
+function buildFourBoard() {
+  S.board = Array.from({length:S.rows}, () => Array(S.cols).fill(0));
+  const container = document.getElementById('game-board-container');
+  container.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'four-wrap';
+
+  const header = document.createElement('div');
+  header.className = 'four-col-headers';
+  header.style.cssText = `display:flex;gap:6px;padding:0 10px`;
+  const cellW = 52;
+  for (let c = 0; c < S.cols; c++) {
+    const zone = document.createElement('div');
+    zone.className = 'col-hover-zone';
+    zone.style.cssText = `width:${cellW}px`;
+    const disc = document.createElement('div');
+    disc.className = 'col-hint-disc';
+    disc.id = `hdisc-${c}`;
+    disc.style.background = S.p1color;
+    zone.appendChild(disc);
+    zone.addEventListener('click', () => humanDropFour(c));
+    if (S.hoverEnabled) {
+      zone.addEventListener('mouseenter', () => onColHover(c, true));
+      zone.addEventListener('mouseleave', () => onColHover(c, false));
+    }
+    header.appendChild(zone);
+  }
+
+  const board = document.createElement('div');
+  board.className = 'four-board';
+  board.id = 'four-board';
+  for (let r = 0; r < S.rows; r++) {
+    const row = document.createElement('div');
+    row.className = 'four-row';
+    for (let c = 0; c < S.cols; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'four-cell';
+      cell.dataset.r = r; cell.dataset.c = c;
+      cell.addEventListener('click', () => humanDropFour(c));
+      if (S.hoverEnabled) {
+        cell.addEventListener('mouseenter', () => onColHover(c, true));
+        cell.addEventListener('mouseleave', () => onColHover(c, false));
+      }
+      row.appendChild(cell);
+    }
+    board.appendChild(row);
+  }
+  wrap.appendChild(header);
+  wrap.appendChild(board);
+  container.appendChild(wrap);
+}
+
+function onColHover(col, enter) {
+  if (S.gameOver || S.aiThinking || S.currentPlayer !== 1) return;
+  for (let c = 0; c < S.cols; c++) {
+    const d = document.getElementById(`hdisc-${c}`);
+    if (!d) continue;
+    d.style.background = S.p1color; // always P1's colour
+    d.classList.toggle('visible', enter && c === col);
+  }
+}
+
+function humanDropFour(col) {
+  if (S.gameOver || S.aiThinking || S.currentPlayer !== 1) return;
+  for (let c = 0; c < S.cols; c++) {
+    const d = document.getElementById(`hdisc-${c}`);
+    if (d) d.classList.remove('visible');
+  }
+  dropDisc(col, 1);
+}
+
+function dropDisc(col, player) {
+  const row = lowestEmpty(col);
+  if (row === -1) return false;
+  S.board[row][col] = player;
+  renderDisc(row, col, player);
+  clearInterval(S.timerInterval);
+  const won = findWin(row, col, player);
+  if (won) { setTimeout(() => { flashCells(won); showResult(player); }, 100); return true; }
+  if (boardFull()) { setTimeout(() => showResult(0), 100); return true; }
+  S.currentPlayer = player === 1 ? 2 : 1;
+  updateStatus();
+  if (S.opponent === 'ai' && S.currentPlayer === 2) {
+    scheduleAIFour();
+  } else {
+    startTimer();
+  }
+  return true;
+}
+
+function lowestEmpty(col) {
+  for (let r = S.rows - 1; r >= 0; r--) if (S.board[r][col] === 0) return r;
+  return -1;
+}
+
+function renderDisc(row, col, player) {
+  const cell = document.querySelector(`#four-board [data-r="${row}"][data-c="${col}"]`);
+  if (!cell) return;
+  cell.style.background = player === 1 ? S.p1color : S.p2color;
+  cell.classList.add('dropping');
+  cell.addEventListener('animationend', () => cell.classList.remove('dropping'), {once:true});
+}
+
+function findWin(row, col, player) {
+  const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+  for (const [dr,dc] of dirs) {
+    let cells = [[row,col]];
+    for (const s of [1,-1]) {
+      let r = row+dr*s, c = col+dc*s;
+      while (r>=0&&r<S.rows&&c>=0&&c<S.cols&&S.board[r][c]===player) {
+        cells.push([r,c]); r+=dr*s; c+=dc*s;
+      }
+    }
+    if (cells.length >= S.winLen) return cells;
+  }
+  return null;
+}
+
+function boardFull() { return S.board.every(r => r.every(c => c !== 0)); }
+
+function flashCells(cells) {
+  cells.forEach(([r,c]) => {
+    const el = document.querySelector(`#four-board [data-r="${r}"][data-c="${c}"]`);
+    if (el) el.classList.add('win-flash');
+  });
+}
+
+function scheduleAIFour() {
+  if (S.gameOver) return;
+  S.aiThinking = true;
+  updateStatus();
+
+  // Compute the best column immediately so the scan leads to the real answer
+  const targetCol = fourAIBestMove();
+
+  // Build a sequence of "look" columns: a few random ones, then the real one
+  const available = [];
+  for (let c = 0; c < S.cols; c++) if (lowestEmpty(c) !== -1) available.push(c);
+  const shuffled = available.filter(c => c !== targetCol).sort(() => Math.random() - 0.5);
+  const lookCols = [...shuffled.slice(0, 2 + Math.floor(Math.random() * 2)), targetCol];
+
+  let step = 0;
+  const stepMs = 260; // ms per column hover
+
+  function showHover(col) {
+    // Clear all hints — restore to P1 color since it's always P1's turn after AI
+    for (let c = 0; c < S.cols; c++) {
+      const d = document.getElementById(`hdisc-${c}`);
+      if (d) { d.classList.remove('visible'); d.style.background = S.p2color; }
+    }
+    if (col !== -1) {
+      const d = document.getElementById(`hdisc-${col}`);
+      if (d) { d.style.background = S.p2color; d.classList.add('visible'); }
+    }
+  }
+
+  function nextStep() {
+    if (S.gameOver) { showHover(-1); S.aiThinking = false; return; }
+    if (step < lookCols.length - 1) {
+      // Still scanning — show a "glance" column
+      showHover(lookCols[step]);
+      step++;
+      setTimeout(nextStep, stepMs);
+    } else {
+      // Final: hover on the chosen column briefly, then drop
+      showHover(targetCol);
+      setTimeout(() => {
+        if (S.gameOver) { showHover(-1); S.aiThinking = false; return; }
+        showHover(-1);
+        // Restore hint discs to P1 colour for human's turn
+        for (let c = 0; c < S.cols; c++) {
+          const d = document.getElementById(`hdisc-${c}`);
+          if (d) d.style.background = S.p1color;
+        }
+        S.aiThinking = false;
+        dropDisc(targetCol, 2);
+      }, stepMs + 80);
+    }
+  }
+
+  // Short initial pause before scan starts
+  setTimeout(nextStep, 300);
+}
+
+
+function fourAIBestMove() {
+  for (let c = 0; c < S.cols; c++) {
+    const r = lowestEmpty(c); if (r === -1) continue;
+    S.board[r][c] = 2; const w = findWin(r,c,2); S.board[r][c] = 0; if (w) return c;
+  }
+  for (let c = 0; c < S.cols; c++) {
+    const r = lowestEmpty(c); if (r === -1) continue;
+    S.board[r][c] = 1; const w = findWin(r,c,1); S.board[r][c] = 0; if (w) return c;
+  }
+  const scores = [];
+  for (let c = 0; c < S.cols; c++) {
+    const r = lowestEmpty(c);
+    if (r === -1) { scores.push(-Infinity); continue; }
+    let score = 0;
+    const mid = (S.cols-1)/2;
+    score += (3 - Math.abs(c-mid)) * 4;
+    S.board[r][c] = 2; score += scoreLine(r,c,2) * 12;
+    if (r > 0) { S.board[r-1][c]=1; if(findWin(r-1,c,1)) score-=80; S.board[r-1][c]=0; }
+    S.board[r][c] = 0;
+    S.board[r][c] = 1; score += scoreLine(r,c,1) * 8; S.board[r][c] = 0;
+    score += (Math.random()-0.5)*6;
+    scores.push(score);
+  }
+  let best=-Infinity, bestCol=Math.floor(S.cols/2);
+  for (let c=0;c<S.cols;c++) if(scores[c]>best){best=scores[c];bestCol=c;}
+  return bestCol;
+}
+
+function scoreLine(row, col, player) {
+  let total=0;
+  for (const[dr,dc]of[[0,1],[1,0],[1,1],[1,-1]]){
+    let cnt=0;
+    for(const s of[1,-1]){let r=row+dr*s,c=col+dc*s;while(r>=0&&r<S.rows&&c>=0&&c<S.cols&&S.board[r][c]===player){cnt++;r+=dr*s;c+=dc*s;}}
+    total+=cnt>=S.winLen-1?10:cnt;
+  }
+  return total;
+}
+
+// ═══════════════════════════════════════════
+//  TIC TAC TOE
+// ═══════════════════════════════════════════
+function buildTTTBoard() {
+  const n = S.tttGrid;
+  S.board = Array.from({length:n}, () => Array(n).fill(0));
+  const container = document.getElementById('game-board-container');
+  container.innerHTML = '';
+  const wrap = document.createElement('div');
+  wrap.className = 'ttt-wrap';
+  if (S.boTarget > 1) {
+    const sc = document.createElement('div');
+    sc.id = 'ttt-scores';
+    sc.style.cssText = 'font-family:var(--mono);font-size:13px;color:var(--muted);display:flex;gap:20px';
+    wrap.appendChild(sc);
+    refreshTTTScores();
+  }
+  const cs = n >= 5 ? 70 : n === 4 ? 84 : 100;
+  const board = document.createElement('div');
+  board.className = 'ttt-board'; board.id = 'ttt-board';
+  board.style.gridTemplateColumns = `repeat(${n},${cs}px)`;
+  for (let r=0;r<n;r++) for(let c=0;c<n;c++) {
+    const cell = document.createElement('div');
+    cell.className = 'ttt-cell';
+    cell.style.cssText = `width:${cs}px;height:${cs}px;font-size:${Math.round(cs*0.38)}px`;
+    cell.dataset.r = r; cell.dataset.c = c;
+    cell.addEventListener('click', () => humanMoveTTT(r,c));
+    board.appendChild(cell);
+  }
+  wrap.appendChild(board);
+  container.appendChild(wrap);
+}
+
+function refreshTTTScores() {
+  const el = document.getElementById('ttt-scores');
+  if (!el) return;
+  const p2n = S.opponent==='ai'?'AI':'P2';
+  el.textContent = `P1 ${S.scores[0]} – ${S.scores[1]} ${p2n}  ·  Round ${S.gamesPlayed+1}/${S.boTarget}`;
+}
+
+function humanMoveTTT(r,c) {
+  if (S.gameOver||S.aiThinking||S.board[r][c]!==0) return;
+  if (S.opponent==='ai'&&S.currentPlayer!==1) return;
+  placeToken(r,c,S.currentPlayer);
+  afterTTTMove(S.currentPlayer);
+}
+
+function placeToken(r,c,player) {
+  S.board[r][c] = player;
+  const cell = document.querySelector(`#ttt-board [data-r="${r}"][data-c="${c}"]`);
+  if (!cell) return;
+  cell.textContent = player===1?S.p1sym:S.p2sym;
+  cell.style.color = player===1?S.p1color:S.p2color;
+  cell.classList.add(player===1?'p1':'p2','taken');
+}
+
+function afterTTTMove(player) {
+  clearInterval(S.timerInterval);
+  const won = tttFindWin(player);
+  if (won) {
+    won.forEach(([r,c])=>{const el=document.querySelector(`#ttt-board [data-r="${r}"][data-c="${c}"]`);if(el)el.classList.add('win-line');});
+    setTimeout(()=>endRound(player),700); return;
+  }
+  if (tttBoardFull()) { setTimeout(()=>endRound(0),400); return; }
+  S.currentPlayer = player===1?2:1;
+  updateStatus(); startTimer();
+  if (S.opponent==='ai'&&S.currentPlayer===2) scheduleAITTT();
+}
+
+function tttFindWin(player) {
+  const n=S.tttGrid,need=S.winLen,dirs=[[0,1],[1,0],[1,1],[1,-1]];
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++) if(S.board[r][c]===player){
+    for(const[dr,dc]of dirs){
+      let cells=[[r,c]],rr=r+dr,cc=c+dc;
+      while(rr>=0&&rr<n&&cc>=0&&cc<n&&S.board[rr][cc]===player){cells.push([rr,cc]);rr+=dr;cc+=dc;}
+      if(cells.length>=need) return cells;
+    }
+  }
+  return null;
+}
+
+function tttBoardFull(){return S.board.every(r=>r.every(c=>c!==0))}
+
+function scheduleAITTT() {
+  if (S.gameOver) return;
+  S.aiThinking = true;
+  updateStatus();
+
+  const [targetR, targetC] = tttAIBestMove();
+
+  // Gather empty cells to "glance" at before placing
+  const empties = [];
+  for (let r = 0; r < S.tttGrid; r++)
+    for (let c = 0; c < S.tttGrid; c++)
+      if (S.board[r][c] === 0 && !(r === targetR && c === targetC)) empties.push([r,c]);
+  empties.sort(() => Math.random() - 0.5);
+  const glances = empties.slice(0, 2 + Math.floor(Math.random() * 2));
+
+  function highlightCell(r, c, on) {
+    const el = document.querySelector(`#ttt-board [data-r="${r}"][data-c="${c}"]`);
+    if (!el || el.classList.contains('taken')) return;
+    if (on) {
+      el.textContent = S.p2sym;
+      el.style.color = S.p2color;
+      el.style.opacity = '0.35';
+    } else {
+      el.textContent = '';
+      el.style.color = '';
+      el.style.opacity = '';
+    }
+  }
+
+  function clearAllGlances() {
+    for (let r = 0; r < S.tttGrid; r++)
+      for (let c = 0; c < S.tttGrid; c++)
+        highlightCell(r, c, false);
+  }
+
+  let step = 0;
+  const stepMs = 240;
+
+  function nextGlance() {
+    if (S.gameOver) { clearAllGlances(); S.aiThinking = false; return; }
+    if (step > 0) highlightCell(glances[step-1][0], glances[step-1][1], false);
+    if (step < glances.length) {
+      highlightCell(glances[step][0], glances[step][1], true);
+      step++;
+      setTimeout(nextGlance, stepMs);
+    } else {
+      // Show final choice briefly
+      highlightCell(targetR, targetC, true);
+      setTimeout(() => {
+        if (S.gameOver) { clearAllGlances(); S.aiThinking = false; return; }
+        clearAllGlances();
+        S.aiThinking = false;
+        placeToken(targetR, targetC, 2);
+        afterTTTMove(2);
+      }, stepMs + 100);
+    }
+  }
+
+  setTimeout(nextGlance, 280);
+}
+
+
+function tttAIBestMove() {
+  const n=S.tttGrid;
+  if(n===3) return minimax3x3();
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(S.board[r][c]===0){S.board[r][c]=2;const w=tttFindWin(2);S.board[r][c]=0;if(w)return[r,c];}
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(S.board[r][c]===0){S.board[r][c]=1;const w=tttFindWin(1);S.board[r][c]=0;if(w)return[r,c];}
+  const mid=(n-1)/2;let best=-Infinity,bR=0,bC=0;
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(S.board[r][c]===0){
+    let sc=(2-Math.abs(r-mid)-Math.abs(c-mid))*5;
+    S.board[r][c]=2;sc+=tttScoreBoard(2)*3;S.board[r][c]=0;
+    S.board[r][c]=1;sc-=tttScoreBoard(1)*2;S.board[r][c]=0;
+    sc+=(Math.random()-0.5)*4;
+    if(sc>best){best=sc;bR=r;bC=c;}
+  }
+  return[bR,bC];
+}
+
+function tttScoreBoard(player){
+  let score=0;const n=S.tttGrid,need=S.winLen,dirs=[[0,1],[1,0],[1,1],[1,-1]];
+  for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(S.board[r][c]===player){
+    for(const[dr,dc]of dirs){let cnt=1,rr=r+dr,cc=c+dc;while(rr>=0&&rr<n&&cc>=0&&cc<n&&S.board[rr][cc]===player){cnt++;rr+=dr;cc+=dc;}if(cnt>=need-1)score+=cnt*cnt;}
+  }
+  return score;
+}
+
+function minimax3x3(){
+  let best=-Infinity,bR=0,bC=0;
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(S.board[r][c]===0){
+    S.board[r][c]=2;const sc=mmScore(false,0,-Infinity,Infinity);S.board[r][c]=0;
+    if(sc>best){best=sc;bR=r;bC=c;}
+  }
+  return[bR,bC];
+}
+
+function mmScore(isMax,depth,alpha,beta){
+  const w2=tttFindWin(2),w1=tttFindWin(1);
+  if(w2)return 10-depth;if(w1)return depth-10;if(tttBoardFull())return 0;
+  if(isMax){let v=-Infinity;for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(S.board[r][c]===0){S.board[r][c]=2;v=Math.max(v,mmScore(false,depth+1,alpha,beta));S.board[r][c]=0;alpha=Math.max(alpha,v);if(alpha>=beta)return v;}return v;}
+  else{let v=Infinity;for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(S.board[r][c]===0){S.board[r][c]=1;v=Math.min(v,mmScore(true,depth+1,alpha,beta));S.board[r][c]=0;beta=Math.min(beta,v);if(beta<=alpha)return v;}return v;}
+}
+
+// ═══════════════════════════════════════════
+//  ROUND END
+// ═══════════════════════════════════════════
+function endRound(winner) {
+  S.gameOver=true; clearInterval(S.timerInterval);
+  document.getElementById('timer-bar-wrap').style.display='none';
+  if(winner>0) S.scores[winner-1]++;
+  S.gamesPlayed++;
+  refreshTTTScores();
+  const need=Math.ceil(S.boTarget/2);
+  const done=S.boTarget===1||S.scores[0]>=need||S.scores[1]>=need||S.gamesPlayed>=S.boTarget;
+  if(done||S.game==='four'){
+    const fw=S.scores[0]>S.scores[1]?1:S.scores[1]>S.scores[0]?2:0;
+    showResult(S.game==='four'?winner:fw);
+  } else {
+    setTimeout(()=>{
+      S.gameOver=false;S.currentPlayer=S.gamesPlayed%2===0?1:2;
+      buildTTTBoard();updateStatus();startTimer();
+      if(S.opponent==='ai'&&S.currentPlayer===2) scheduleAITTT();
+    },1400);
+  }
+}
+
+function showResult(w){
+  const p2n=S.opponent==='ai'?'AI':'Player 2';
+  document.getElementById('result-emoji').textContent=w===0?'🤝':w===1?'🎉':'🤖';
+  document.getElementById('result-title').textContent=w===0?"It's a draw!":w===1?'Player 1 wins!':`${p2n} wins!`;
+  document.getElementById('result-sub').textContent=w===0?'Perfectly even.':w===1?'Nice play!':'Better luck next time.';
+  setTimeout(()=>{document.getElementById('result-overlay').style.display='flex';},700);
+}
+
+function rematch(){
+  document.getElementById('result-overlay').style.display='none';
+  S.scores=[0,0];S.gamesPlayed=0;S.currentPlayer=1;initRound();
+}
+
+function confirmQuit(){
+  const ov=document.createElement('div');
+  ov.id='quit-overlay';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(6px);z-index:200;display:flex;align-items:center;justify-content:center';
+  ov.innerHTML=`<div style="background:#1e1e28;border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:36px 40px;text-align:center;max-width:320px;width:90%;animation:fadeUp 0.25s ease"><p style="font-size:20px;font-weight:700;margin-bottom:8px">Quit game?</p><p style="font-size:14px;color:rgba(240,238,255,0.5);margin-bottom:28px">You'll lose your current progress.</p><div style="display:flex;gap:10px;justify-content:center"><button onclick="document.getElementById('quit-overlay').remove()" style="background:transparent;color:rgba(240,238,255,0.6);border:1px solid rgba(255,255,255,0.12);border-radius:10px;padding:11px 24px;font-family:inherit;font-size:14px;cursor:pointer">Keep playing</button><button onclick="quitConfirmed()" style="background:#7c6ff7;color:#fff;border:none;border-radius:10px;padding:11px 24px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">Quit</button></div></div>`;
+  document.body.appendChild(ov);
+}
+
+function quitConfirmed(){
+  const ov=document.getElementById('quit-overlay');if(ov)ov.remove();
+  clearInterval(S.timerInterval);S.gameOver=true;S.aiThinking=false;showScreen('intro');
+}
+
+// ═══════════════════════════════════════════
+//  TIMER
+// ═══════════════════════════════════════════
+function startTimer(){
+  clearInterval(S.timerInterval);
+  const wrap=document.getElementById('timer-bar-wrap'),bar=document.getElementById('timer-bar');
+  if(!S.timeLimit||S.gameOver){wrap.style.display='none';return;}
+  wrap.style.display='block';S.timeLeft=S.timeLimit;
+  bar.style.width='100%';bar.className='timer-bar';bar.style.transition='none';void bar.offsetWidth;
+  bar.style.transition=`width ${S.timeLimit}s linear`;bar.style.width='0%';
+  S.timerInterval=setInterval(()=>{
+    if(S.gameOver||S.aiThinking) return;
+    S.timeLeft--;
+    const pct=(S.timeLeft/S.timeLimit)*100;
+    bar.className='timer-bar'+(pct<30?' danger':pct<60?' warning':'');
+    updateStatus();
+    if(S.timeLeft<=0){clearInterval(S.timerInterval);autoMove();}
+  },1000);
+}
+
+function autoMove(){
+  if(S.gameOver) return;
+  if(S.game==='four'){
+    const avail=[];for(let c=0;c<S.cols;c++)if(lowestEmpty(c)!==-1)avail.push(c);
+    if(avail.length) dropDisc(avail[Math.floor(Math.random()*avail.length)],S.currentPlayer);
+  } else {
+    const empty=[];for(let r=0;r<S.tttGrid;r++)for(let c=0;c<S.tttGrid;c++)if(S.board[r][c]===0)empty.push([r,c]);
+    if(empty.length){const[r,c]=empty[Math.floor(Math.random()*empty.length)];placeToken(r,c,S.currentPlayer);afterTTTMove(S.currentPlayer);}
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SPIN THE WHEEL
+// ═══════════════════════════════════════════
+const WHEEL_COLORS = [
+  '#7c6ff7','#f76fa8','#5ef0a0','#f7c96f','#3b82f6',
+  '#f97316','#a855f7','#22c55e','#ef4444','#06b6d4',
+  '#eab308','#ec4899','#14b8a6','#8b5cf6','#f59e0b'
+];
+
+let wheelItems = ['Alice','Bob','Charlie','Dana'];
+let wheelAngle = 0;
+let wheelSpinning = false;
+let wheelHistory = [];
+let rafId = null;
+
+function getWheelColor(i){ return WHEEL_COLORS[i % WHEEL_COLORS.length]; }
+
+function drawWheel(highlightIndex = -1) {
+  const canvas = document.getElementById('wheelCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const cx = W/2, cy = H/2, r = W/2 - 8;
+  ctx.clearRect(0,0,W,H);
+  const n = wheelItems.length;
+
+  if (n === 0) {
+    ctx.fillStyle = '#1e1e28';
+    ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(240,238,255,0.3)';
+    ctx.font = '14px Space Grotesk, sans-serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('Add items below', cx, cy);
+    return;
+  }
+
+  const slice = (Math.PI*2) / n;
+  for (let i = 0; i < n; i++) {
+    const start = wheelAngle + i*slice;
+    const end = start + slice;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,end);
+    ctx.closePath();
+    ctx.fillStyle = highlightIndex === i
+      ? lightenHex(getWheelColor(i), 40) : getWheelColor(i);
+    ctx.fill();
+    ctx.strokeStyle = '#0e0e12';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Label
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(start + slice/2);
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 4;
+    const fontSize = n > 10 ? 10 : n > 6 ? 12 : 14;
+    ctx.font = `600 ${fontSize}px Space Grotesk, sans-serif`;
+    const label = wheelItems[i].length > 16 ? wheelItems[i].slice(0,15)+'…' : wheelItems[i];
+    ctx.fillText(label, r - 12, 0);
+    ctx.restore();
+  }
+
+  // Center circle
+  ctx.beginPath();
+  ctx.arc(cx,cy,22,0,Math.PI*2);
+  ctx.fillStyle = '#0e0e12';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(124,111,247,0.4)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Outer ring
+  ctx.beginPath();
+  ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle = 'rgba(124,111,247,0.25)';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+}
+
+function lightenHex(hex, amount) {
+  const num = parseInt(hex.replace('#',''),16);
+  const r = Math.min(255,(num>>16)+amount);
+  const g = Math.min(255,((num>>8)&0xff)+amount);
+  const b = Math.min(255,(num&0xff)+amount);
+  return `rgb(${r},${g},${b})`;
+}
+
+function getWinnerIndex() {
+  // Pointer is at top (270deg = 3π/2). Find which slice is under it.
+  const n = wheelItems.length;
+  if (n === 0) return -1;
+  const slice = (Math.PI*2)/n;
+  const pointer = Math.PI * 1.5; // top = 270deg
+  let a = ((pointer - wheelAngle) % (Math.PI*2) + Math.PI*2) % (Math.PI*2);
+  return Math.floor(a / slice) % n;
+}
+
+function spinWheel() {
+  if (wheelSpinning || wheelItems.length < 2) return;
+  wheelSpinning = true;
+  document.getElementById('spin-btn').disabled = true;
+  document.getElementById('wheel-result').innerHTML = '<span style="color:var(--muted)">Spinning…</span>';
+  document.getElementById('wheel-result').classList.remove('lit');
+
+  const totalRot = (Math.PI*2) * (5 + Math.random()*8); // 5-13 full rotations
+  const duration = 3000 + Math.random()*1500;
+  const startAngle = wheelAngle;
+  const startTime = performance.now();
+
+  function easeOut(t) { return 1 - Math.pow(1-t, 4); }
+
+  function frame(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    wheelAngle = startAngle + totalRot * easeOut(t);
+    drawWheel();
+    if (t < 1) {
+      rafId = requestAnimationFrame(frame);
+    } else {
+      wheelAngle = startAngle + totalRot;
+      wheelSpinning = false;
+      document.getElementById('spin-btn').disabled = false;
+      const winner = getWinnerIndex();
+      showWheelResult(winner);
+    }
+  }
+  rafId = requestAnimationFrame(frame);
+}
+
+function showWheelResult(idx) {
+  const item = wheelItems[idx];
+  const color = getWheelColor(idx);
+  const res = document.getElementById('wheel-result');
+  res.innerHTML = `<span style="width:12px;height:12px;border-radius:50%;background:${color};flex-shrink:0;display:inline-block"></span> <span style="font-size:17px">${item}</span>`;
+  res.classList.add('lit');
+  drawWheel(idx);
+  // Add to history
+  wheelHistory.unshift({item, color, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});
+  if (wheelHistory.length > 10) wheelHistory.pop();
+  renderWheelHistory();
+}
+
+function renderWheelItems() {
+  const list = document.getElementById('wheel-items-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (wheelItems.length === 0) {
+    list.innerHTML = '<span style="font-size:12px;color:var(--muted);padding:4px 0">No items yet. Add some below.</span>';
+    return;
+  }
+  wheelItems.forEach((item, i) => {
+    const row = document.createElement('div');
+    row.className = 'wheel-item-row';
+    row.innerHTML = `
+      <div class="wheel-item-dot" style="background:${getWheelColor(i)}"></div>
+      <input class="wheel-item-text" value="${item}" maxlength="40"
+        onchange="wheelItems[${i}]=this.value.trim()||wheelItems[${i}];drawWheel()"/>
+      <button class="wheel-item-del" onclick="removeWheelItem(${i})" title="Remove">×</button>`;
+    list.appendChild(row);
+  });
+}
+
+function renderWheelHistory() {
+  const list = document.getElementById('history-list');
+  if (!list) return;
+  if (wheelHistory.length === 0) {
+    list.innerHTML = '<span style="font-size:12px;color:var(--muted)">No spins yet.</span>';
+    return;
+  }
+  list.innerHTML = '';
+  wheelHistory.forEach((h,i) => {
+    const row = document.createElement('div');
+    row.className = 'history-row';
+    row.innerHTML = `<span class="history-num">#${wheelHistory.length-i}</span><span class="history-dot" style="background:${h.color}"></span><span style="flex:1">${h.item}</span><span style="font-size:10px;color:rgba(240,238,255,0.25);font-family:var(--mono)">${h.time}</span>`;
+    list.appendChild(row);
+  });
+}
+
+function addWheelItem() {
+  const inp = document.getElementById('wheel-add-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  wheelItems.push(val);
+  inp.value = '';
+  renderWheelItems();
+  drawWheel();
+}
+
+function removeWheelItem(i) {
+  wheelItems.splice(i,1);
+  renderWheelItems();
+  drawWheel();
+}
+
+function clearWheel() {
+  wheelItems = [];
+  renderWheelItems();
+  drawWheel();
+  document.getElementById('wheel-result').innerHTML = '<span style="color:var(--muted)">Spin the wheel to get a result</span>';
+  document.getElementById('wheel-result').classList.remove('lit');
+}
+
+function loadPreset(preset) {
+  if (preset === 'yesno') wheelItems = ['Yes', 'No'];
+  else if (preset === 'players') wheelItems = ['Player 1','Player 2','Player 3','Player 4'];
+  else if (preset === 'games') wheelItems = ['4 in a Row','Tic Tac Toe','Mastermind','Word Guess','Trivia'];
+  renderWheelItems();
+  drawWheel();
+  document.getElementById('wheel-result').innerHTML = '<span style="color:var(--muted)">Spin the wheel to get a result</span>';
+  document.getElementById('wheel-result').classList.remove('lit');
+}
+
+// Init wheel items on load
+document.addEventListener('DOMContentLoaded', () => {
+  renderWheelItems();
+  renderWheelHistory();
+});
+
+// ═══════════════════════════════════════════
+//  HANGMAN
+// ═══════════════════════════════════════════
+const HM_WORDS = {
+  animals:[
+    'elephant','giraffe','penguin','crocodile','butterfly','dolphin','octopus','kangaroo','cheetah','flamingo',
+    'chameleon','porcupine','rhinoceros','armadillo','orangutan','wolverine','salamander','platypus','komodo','albatross',
+    'capybara','narwhal','axolotl','mongoose','warthog','meerkat','pangolin','tapir','manatee','lemur',
+    'wolverine','chinchilla','pelican','anteater','macaw','iguana','piranha','seahorse','jellyfish','hedgehog',
+    'baboon','walrus','lynx','bison','toucan','coyote','sloth','cobra','vulture','stingray'
+  ],
+  countries:[
+    'netherlands','germany','australia','portugal','argentina','indonesia','switzerland','mozambique','cambodia','venezuela',
+    'bangladesh','zimbabwe','guatemala','azerbaijan','madagascar','luxembourg','philippines','Kazakhstan','uzbekistan','cameroon',
+    'nicaragua','mauritius','tajikistan','kyrgyzstan','montenegro','liechtenstein','bhutan','paraguay','honduras','suriname',
+    'moldova','albania','slovakia','slovenia','estonia','latvia','lithuania','ukraine','bulgaria','romania',
+    'tanzania','ethiopia','zimbabwe','morocco','ecuador','colombia','thailand','malaysia','singapore','vietnam'
+  ],
+  food:[
+    'spaghetti','avocado','croissant','pineapple','cinnamon','quesadilla','artichoke','eggplant','blueberry','watermelon',
+    'bruschetta','guacamole','prosciutto','tiramisu','mozzarella','risotto','enchilada','chimichanga','burrito','falafel',
+    'hummus','baklava','cannoli','antipasto','pancetta','calamari','gnocchi','ravioli','bolognese','parmesan',
+    'edamame','tempura','sashimi','ramen','pho','kimchi','dumplings','bibimbap','shakshuka','tabbouleh',
+    'gazpacho','paella','jambalaya','gumbo','barbecue','chowder','stroganoff','schnitzel','bratwurst','pierogi'
+  ],
+  tech:[
+    'javascript','keyboard','algorithm','database','interface','raspberry','processor','bluetooth','firewall','bandwidth',
+    'encryption','repository','framework','recursion','debugging','compiler','variable','function','iteration','abstraction',
+    'middleware','blockchain','cryptocurrency','artificial','intelligence','machine','learning','network','protocol','ethernet',
+    'hypertext','stylesheet','responsive','deployment','container','kubernetes','microservice','virtualisation','authentication','authorisation',
+    'developer','frontend','backend','fullstack','typescript','python','terminal','command','server','browser'
+  ],
+  sports:[
+    'basketball','volleyball','badminton','swimming','gymnastics','wrestling','athletics','skateboard','snowboard','cycling',
+    'triathlon','decathlon','marathon','sprinting','javelin','discus','hurdles','pentathlon','equestrian','fencing',
+    'archery','kayaking','canoeing','climbing','bobsled','biathlon','handball','lacrosse','waterpolo','softball',
+    'cricket','squash','racquetball','pickleball','footvolley','dodgeball','kickboxing','taekwondo','jujitsu','karate',
+    'windsurfing','kitesurfing','paragliding','skydiving','motocross','mountainbike','trampoline','cheerleading','curling','rowing'
+  ],
+  movies:[
+    'inception','interstellar','gladiator','braveheart','casablanca','vertigo','chinatown','apocalypse','manhattan','goodfellas',
+    'schindler','shawshank','godfather','scarface','terminator','predator','robocop','jaws','alien','psycho',
+    'memento','parasite','whiplash','spotlight','moonlight','birdman','revenant','atonement','atonement','departed',
+    'prestige','shining','clockwork','labyrinth','beetlejuice','gremlins','ghostbusters','batman','superman','spiderman',
+    'avengers','endgame','infinity','neverending','princess','labyrinth','spirited','nausicaa','totoro','mononoke'
+  ],
+  random:[
+    'adventure','bicycle','chocolate','detective','fountain','gorgeous','helicopter','illusion','juggling','kaleidoscope',
+    'labyrinth','mysterious','nostalgia','orchestra','parachute','quicksand','raspberry','symphony','telescope','umbrella',
+    'waterfall','xylophone','yesterday','zigzag','whirlpool','thunderstorm','silhouette','raspberry','abandoned','beautiful',
+    'conference','dangerous','emergency','fireworks','gratitude','happiness','important','jealousy','knowledge','lightning',
+    'marathon','nightmare','obsolete','paradise','question','remember','surprise','treasure','universe','wonderful'
+  ]
+};
+
+let HM = {
+  word:'', guessed:new Set(), maxWrong:6, category:'random',
+  wrong:0, state:'idle', rounds:1, currentRound:1, scores:{},
+  wordSource:'random', players:2
+};
+
+// ── Settings helpers ──
+let hmPlayerCount = 2;
+function hmChangeP(delta) {
+  hmPlayerCount = Math.max(2, Math.min(8, hmPlayerCount + delta));
+  document.getElementById('hm-p-val').textContent = hmPlayerCount;
+  document.getElementById('hm-p-dec').disabled = hmPlayerCount <= 2;
+  document.getElementById('hm-p-inc').disabled = hmPlayerCount >= 8;
+}
+
+function hmUpdateSourceHint() {
+  const src = cfg['hm-source'] || 'random';
+  const hint = document.getElementById('hm-source-hint');
+  const catField = document.getElementById('hm-category-field');
+  if (src === 'custom') {
+    if (hint) hint.textContent = 'One player types a secret word — others guess together.';
+    if (catField) catField.style.display = 'none';
+  } else {
+    if (hint) hint.textContent = 'A word is picked from the selected category automatically.';
+    if (catField) catField.style.display = '';
+  }
+}
+
+function startHangman() {
+  HM.category = cfg['hm-category'] || 'random';
+  HM.maxWrong = parseInt(cfg['hm-maxwrong'] || '6');
+  HM.rounds = parseInt(cfg['hm-rounds'] || '1');
+  HM.wordSource = cfg['hm-source'] || 'random';
+  HM.players = hmPlayerCount;
+  HM.currentRound = 1;
+  HM.scores = {};
+
+  if (HM.wordSource === 'custom') {
+    // Show set-word screen first
+    const inp = document.getElementById('hm-secret-input');
+    if (inp) { inp.value = ''; }
+    document.getElementById('hm-setword-hint').textContent = '';
+    showScreen('hangman-setword');
+  } else {
+    hmStartRound(hmPickWord());
+  }
+}
+
+function hmConfirmWord() {
+  const inp = document.getElementById('hm-secret-input');
+  const val = inp ? inp.value.trim() : '';
+  if (!val) {
+    document.getElementById('hm-setword-hint').textContent = '⚠ Please type a word first.';
+    return;
+  }
+  if (val.length < 2) {
+    document.getElementById('hm-setword-hint').textContent = '⚠ Word must be at least 2 letters.';
+    return;
+  }
+  hmStartRound(val);
+}
+
+function hmStartRound(word) {
+  const w = word.toUpperCase().replace(/[^A-Z ]/g,'');
+  HM.word = w; HM.guessed = new Set(); HM.wrong = 0; HM.state = 'playing';
+  showScreen('hangman');
+  hmInitKeyboard();
+  hmRender();
+}
+
+function hmStart(word) { // kept for backward compat with in-game buttons
+  if (HM.wordSource === 'custom') {
+    const inp = document.getElementById('hm-secret-input');
+    if (inp) inp.value = '';
+    document.getElementById('hm-setword-hint').textContent = '';
+    showScreen('hangman-setword');
+  } else {
+    hmStartRound(word || hmPickWord());
+  }
+}
+
+function hmPickWord() {
+  // If category is 'random', pick from ALL categories combined
+  let list;
+  if (HM.category === 'random') {
+    list = Object.values(HM_WORDS).flat();
+  } else {
+    list = HM_WORDS[HM.category] || HM_WORDS.random;
+  }
+  return list[Math.floor(Math.random()*list.length)];
+}
+
+function hmGuess(letter) {
+  if (HM.state !== 'playing' || HM.guessed.has(letter)) return;
+  HM.guessed.add(letter);
+  if (!HM.word.includes(letter)) HM.wrong++;
+  const allRevealed = [...HM.word].every(c => c===' ' || HM.guessed.has(c));
+  if (allRevealed) HM.state = 'won';
+  else if (HM.wrong >= HM.maxWrong) HM.state = 'lost';
+  hmRender();
+}
+
+function hmRender() {
+  const svg = document.getElementById('hangman-svg');
+  if (!svg) return;
+  const w = HM.wrong;
+  const max = HM.maxWrong;
+  // Scale body parts to maxWrong (always 6 parts, spread evenly)
+  const step = max / 6;
+  svg.innerHTML = `
+    <svg viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="20" y1="210" x2="180" y2="210" stroke="rgba(240,238,255,0.25)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="60" y1="210" x2="60" y2="20" stroke="rgba(240,238,255,0.25)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="60" y1="20" x2="130" y2="20" stroke="rgba(240,238,255,0.25)" stroke-width="3" stroke-linecap="round"/>
+      <line x1="130" y1="20" x2="130" y2="45" stroke="rgba(240,238,255,0.25)" stroke-width="3" stroke-linecap="round"/>
+      ${w>=step*1?`<circle cx="130" cy="62" r="17" stroke="#f76fa8" stroke-width="2.5"/>`:''}
+      ${w>=step*2?`<line x1="130" y1="79" x2="130" y2="135" stroke="#7c6ff7" stroke-width="2.5" stroke-linecap="round"/>`:''}
+      ${w>=step*3?`<line x1="130" y1="95" x2="105" y2="115" stroke="#7c6ff7" stroke-width="2.5" stroke-linecap="round"/>`:''}
+      ${w>=step*4?`<line x1="130" y1="95" x2="155" y2="115" stroke="#7c6ff7" stroke-width="2.5" stroke-linecap="round"/>`:''}
+      ${w>=step*5?`<line x1="130" y1="135" x2="108" y2="160" stroke="#7c6ff7" stroke-width="2.5" stroke-linecap="round"/>`:''}
+      ${w>=step*6?`<line x1="130" y1="135" x2="152" y2="160" stroke="#7c6ff7" stroke-width="2.5" stroke-linecap="round"/>`:''}
+    </svg>`;
+
+  const wordEl = document.getElementById('hm-word');
+  if (wordEl) {
+    wordEl.innerHTML = [...HM.word].map(c =>
+      c === ' '
+        ? `<span class="letter-slot space"></span>`
+        : `<span class="letter-slot ${HM.guessed.has(c)?'revealed':''}">${HM.guessed.has(c)||HM.state==='lost'?c:''}</span>`
+    ).join('');
+  }
+
+  document.querySelectorAll('.key-btn').forEach(btn => {
+    const l = btn.dataset.letter;
+    btn.disabled = HM.state !== 'playing' || HM.guessed.has(l);
+    btn.classList.toggle('hit', HM.guessed.has(l) && HM.word.includes(l));
+    btn.classList.toggle('miss', HM.guessed.has(l) && !HM.word.includes(l));
+  });
+
+  const statusEl = document.getElementById('hm-status');
+  if (statusEl) {
+    if (HM.state === 'won') statusEl.innerHTML = `<span style="color:var(--green)">🎉 You got it!</span>`;
+    else if (HM.state === 'lost') statusEl.innerHTML = `<span style="color:var(--accent2)">💀 It was: <b>${HM.word}</b></span>`;
+    else statusEl.textContent = `${HM.maxWrong - HM.wrong} / ${HM.maxWrong} guesses left`;
+  }
+
+  const metaEl = document.getElementById('hm-meta');
+  if (metaEl) {
+    const cat = HM.category === 'random' ? 'Any category' : HM.category.charAt(0).toUpperCase()+HM.category.slice(1);
+    const roundStr = HM.rounds > 1 ? ` · Round ${HM.currentRound}/${HM.rounds}` : '';
+    metaEl.textContent = `${w}/${HM.maxWrong} wrong · ${HM.word.replace(/ /g,'').length} letters · ${cat}${roundStr}`;
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (document.getElementById('screen-hangman')?.classList.contains('active')) {
+    const l = e.key.toUpperCase();
+    if (/^[A-Z]$/.test(l)) hmGuess(l);
+  }
+});
+
+// ═══════════════════════════════════════════
+//  DICE ROLLER
+// ═══════════════════════════════════════════
+let DICE = { sides: 6, count: 2, rolling: false, history: [], lastRolls: [] };
+
+function diceSetType(sides, btn) {
+  DICE.sides = sides;
+  document.querySelectorAll('.dice-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  diceUpdateDisplay();
+}
+
+function diceChangeCount(delta) {
+  DICE.count = Math.max(1, Math.min(10, DICE.count + delta));
+  document.getElementById('dice-count-val').textContent = DICE.count;
+  document.getElementById('dice-dec').disabled = DICE.count <= 1;
+  document.getElementById('dice-inc').disabled = DICE.count >= 10;
+  diceUpdateDisplay();
+}
+
+function diceUpdateDisplay() {
+  const tray = document.getElementById('dice-tray');
+  if (!tray) return;
+  tray.innerHTML = '';
+  for (let i = 0; i < DICE.count; i++) {
+    const die = document.createElement('div');
+    die.className = 'die'; die.id = `die-${i}`;
+    die.textContent = DICE.lastRolls[i] ?? '?';
+    die.style.color = 'var(--muted)';
+    tray.appendChild(die);
+  }
+}
+
+function rollDice() {
+  if (DICE.rolling) return;
+  DICE.rolling = true;
+  document.getElementById('roll-btn').disabled = true;
+  const rolls = Array.from({length:DICE.count}, () => Math.floor(Math.random()*DICE.sides)+1);
+  const total = rolls.reduce((a,b)=>a+b,0);
+  let frame = 0;
+  const frames = 12;
+  const interval = setInterval(() => {
+    for (let i = 0; i < DICE.count; i++) {
+      const die = document.getElementById(`die-${i}`);
+      if (die) {
+        die.textContent = Math.floor(Math.random()*DICE.sides)+1;
+        die.style.color = 'var(--muted)';
+        if (frame === 0) die.classList.add('rolling');
+      }
+    }
+    frame++;
+    if (frame >= frames) {
+      clearInterval(interval);
+      for (let i = 0; i < DICE.count; i++) {
+        const die = document.getElementById(`die-${i}`);
+        if (die) {
+          die.textContent = rolls[i];
+          die.style.color = 'var(--text)';
+          die.classList.remove('rolling');
+        }
+      }
+      DICE.lastRolls = rolls;
+      DICE.rolling = false;
+      document.getElementById('roll-btn').disabled = false;
+      const totEl = document.getElementById('dice-total');
+      const lblEl = document.getElementById('dice-total-label');
+      if (totEl) totEl.textContent = total;
+      if (lblEl) lblEl.textContent = DICE.count > 1 ? `total of ${DICE.count}d${DICE.sides}` : `d${DICE.sides}`;
+      DICE.history.unshift({total, rolls: rolls.slice(), sides: DICE.sides, time: new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+      if (DICE.history.length > 8) DICE.history.pop();
+      diceRenderHistory();
+    }
+  }, 40);
+}
+
+function diceRenderHistory() {
+  const list = document.getElementById('dice-history-list');
+  if (!list) return;
+  if (DICE.history.length === 0) { list.innerHTML='<span style="font-size:12px;color:var(--muted)">No rolls yet.</span>'; return; }
+  list.innerHTML = DICE.history.map(h =>
+    `<div class="dice-history-row"><span style="color:var(--accent);font-weight:700">${h.total}</span><span class="dice-breakdown">[${h.rolls.join(', ')}] on d${h.sides}</span><span style="opacity:0.3;font-size:10px">${h.time}</span></div>`
+  ).join('');
+}
+
+document.getElementById('code-in').addEventListener('input', e => {
+  e.target.value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g,'');
+});
+</script>
+<!-- ═══ HANGMAN ═══ -->
+<div id="screen-hangman" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
+  </nav>
+  <div class="inner" style="max-width:860px">
+    <h2 class="page-title anim-in">🪢 Hangman</h2>
+    <p class="page-sub anim-in" style="animation-delay:.06s">Guess the hidden word one letter at a time.</p>
+    <div class="hangman-layout anim-in" style="animation-delay:.1s">
+      <div class="hangman-svg-wrap">
+        <svg id="hangman-svg" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="20" y1="210" x2="180" y2="210" stroke="rgba(240,238,255,0.2)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="60" y1="210" x2="60" y2="20" stroke="rgba(240,238,255,0.2)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="60" y1="20" x2="130" y2="20" stroke="rgba(240,238,255,0.2)" stroke-width="3" stroke-linecap="round"/>
+          <line x1="130" y1="20" x2="130" y2="45" stroke="rgba(240,238,255,0.2)" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <p class="hangman-meta" id="hm-meta">Pick a category to start</p>
+      </div>
+      <div class="hangman-right">
+        <div class="settings-block" style="padding:16px 18px">
+          <p class="block-title">Category</p>
+          <div class="category-row">
+            <button class="cat-btn active" onclick="hmSetCategory('random',this)">🎲 Random</button>
+            <button class="cat-btn" onclick="hmSetCategory('animals',this)">🐘 Animals</button>
+            <button class="cat-btn" onclick="hmSetCategory('countries',this)">🌍 Countries</button>
+            <button class="cat-btn" onclick="hmSetCategory('food',this)">🍕 Food</button>
+            <button class="cat-btn" onclick="hmSetCategory('tech',this)">💻 Tech</button>
+          </div>
+        </div>
+        <div class="settings-block" style="padding:16px 18px">
+          <p class="block-title">Custom word</p>
+          <div class="custom-word-row">
+            <input class="custom-word-input" id="hm-custom-input" placeholder="Type a secret word…" maxlength="30"
+              onkeydown="if(event.key==='Enter'){const v=this.value.trim();if(v){hmStart(v);this.value=''}}"/>
+            <button class="custom-word-btn" onclick="const v=document.getElementById('hm-custom-input').value.trim();if(v){hmStart(v);document.getElementById('hm-custom-input').value=''}">Set word</button>
+          </div>
+          <p class="hint" style="margin-top:6px">Pass the device — the other player sets the word, you guess.</p>
+        </div>
+        <div class="word-display" id="hm-word">
+          <span style="color:var(--muted);font-size:14px">Start a game to see the word slots</span>
+        </div>
+        <p class="hangman-status" id="hm-status"></p>
+        <div class="keyboard" id="hm-keyboard"></div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn-create" style="flex:1" onclick="hmStart()">Random word</button>
+          <button class="btn-cancel" style="flex:1" onclick="hmStart()">New game</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ DICE ROLLER ═══ -->
+<div id="screen-dice" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="showScreen('intro')">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('tools')">← Back to tools</button>
+  </nav>
+  <div class="inner" style="max-width:760px">
+    <h2 class="page-title anim-in">🎲 Dice Roller</h2>
+    <p class="page-sub anim-in" style="animation-delay:.06s">Pick your dice type and how many, then roll.</p>
+    <div class="dice-layout anim-in" style="animation-delay:.1s">
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="dice-tray" id="dice-tray">
+          <span style="color:var(--muted);font-size:14px">Roll to see your dice</span>
+        </div>
+        <div class="settings-block" style="padding:16px 18px;text-align:center">
+          <div class="dice-total" id="dice-total">—</div>
+          <div class="dice-total-label" id="dice-total-label">no roll yet</div>
+        </div>
+      </div>
+      <div class="dice-controls">
+        <div class="settings-block" style="padding:18px">
+          <p class="block-title">Dice type</p>
+          <div class="dice-type-row">
+            <button class="dice-type-btn" onclick="diceSetType(4,this)">D4</button>
+            <button class="dice-type-btn active" onclick="diceSetType(6,this)">D6</button>
+            <button class="dice-type-btn" onclick="diceSetType(8,this)">D8</button>
+            <button class="dice-type-btn" onclick="diceSetType(10,this)">D10</button>
+            <button class="dice-type-btn" onclick="diceSetType(12,this)">D12</button>
+            <button class="dice-type-btn" onclick="diceSetType(20,this)">D20</button>
+            <button class="dice-type-btn" onclick="diceSetType(100,this)">D100</button>
+          </div>
+        </div>
+        <div class="settings-block" style="padding:18px">
+          <p class="block-title">Number of dice</p>
+          <div class="dice-count-row">
+            <button class="dice-count-btn" id="dice-dec" onclick="diceChangeCount(-1)" disabled>−</button>
+            <span class="dice-count-val" id="dice-count-val">2</span>
+            <button class="dice-count-btn" id="dice-inc" onclick="diceChangeCount(1)">+</button>
+          </div>
+        </div>
+        <button class="roll-btn" id="roll-btn" onclick="rollDice()">🎲 Roll!</button>
+        <div class="settings-block" style="padding:16px 18px">
+          <p class="block-title">Roll history</p>
+          <div id="dice-history-list"><span style="font-size:12px;color:var(--muted)">No rolls yet.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

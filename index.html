@@ -365,6 +365,29 @@ canvas#wheelCanvas{border-radius:50%;display:block}
   padding:5px 11px;cursor:pointer;transition:background 0.12s,color 0.12s,border-color 0.12s}
 .cat-btn:hover,.cat-btn.active{background:rgba(124,111,247,0.15);color:var(--accent);border-color:rgba(124,111,247,0.3)}
 
+/* ── GUESS THE CODE ── */
+.gc-layout{display:flex;flex-direction:column;gap:20px;align-items:center;width:100%;max-width:640px;margin:0 auto}
+.gc-side{width:100%}
+.gc-side-label{font-size:12px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;text-align:center}
+.gc-slots{display:flex;gap:8px;justify-content:center;margin-bottom:10px}
+.gc-slot{width:42px;height:52px;border-radius:9px;background:#0a0a10;border:2px solid rgba(124,111,247,0.18);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:22px;font-weight:700;
+  color:var(--muted);transition:background 0.2s,border-color 0.2s,color 0.2s}
+.gc-slot.revealed{background:rgba(94,240,160,0.15);border-color:var(--green);color:var(--green)}
+.gc-guess-row{display:flex;gap:8px;justify-content:center;margin-bottom:14px}
+.gc-guess-input{background:var(--card);border:1px solid var(--border);border-radius:10px;
+  padding:11px 14px;color:var(--text);font-family:var(--mono);font-size:16px;letter-spacing:0.15em;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;width:160px;text-align:center}
+.gc-guess-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-g)}
+.gc-guess-btn{font-family:var(--font);font-size:14px;font-weight:600;padding:11px 22px;
+  border-radius:10px;border:none;background:var(--accent);color:#fff;cursor:pointer;transition:background 0.15s}
+.gc-guess-btn:hover:not(:disabled){background:#8f84fa}
+.gc-guess-btn:disabled{opacity:0.4;cursor:not-allowed}
+.gc-history{display:flex;flex-direction:column;gap:4px;max-height:120px;overflow-y:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.gc-history-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px solid var(--border)}
+.gc-history-row:last-child{border:none}
+.gc-history-code{letter-spacing:0.15em;color:var(--text)}
+
 /* ── DICE ROLLER ── */
 .dice-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
 @media(max-width:640px){.dice-layout{grid-template-columns:1fr}}
@@ -452,7 +475,10 @@ canvas#wheelCanvas{border-radius:50%;display:block}
         <span class="card-badge badge-ready">Ready</span><span class="card-icon">🪢</span>
         <p class="card-name">Hangman</p><p class="card-desc">Guess the word before the man hangs.</p>
       </div>
-      <div class="game-card disabled anim-in" style="animation-delay:.28s"><span class="card-badge badge-soon">Soon</span><span class="card-icon">🔐</span><p class="card-name">Mastermind</p><p class="card-desc">Crack the code.</p></div>
+      <div class="game-card anim-in" style="animation-delay:.28s;--card-glow:rgba(247,199,111,0.12)" onclick="openSettings('guesscode')">
+        <span class="card-badge badge-ready">Ready</span><span class="card-icon">🔐</span>
+        <p class="card-name">Guess the Code</p><p class="card-desc">Set a code, crack theirs first.</p>
+      </div>
       <div class="game-card disabled anim-in" style="animation-delay:.34s"><span class="card-badge badge-soon">Soon</span><span class="card-icon">✏️</span><p class="card-name">Word Guess</p><p class="card-desc">Wordle-style.</p></div>
       <div class="game-card disabled anim-in" style="animation-delay:.4s"><span class="card-badge badge-soon">Soon</span><span class="card-icon">🧠</span><p class="card-name">Trivia</p><p class="card-desc">Race to answer fastest.</p></div>
     </div>
@@ -692,6 +718,85 @@ canvas#wheelCanvas{border-radius:50%;display:block}
   </div>
 </div>
 
+<!-- ═══ SETTINGS — GUESS THE CODE ═══ -->
+<div id="screen-settings-guesscode" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('create')">← Back to games</button>
+  </nav>
+  <div class="inner">
+    <div class="game-header anim-in">
+      <span class="game-header-icon">🔐</span>
+      <div><p class="game-header-name">Guess the Code</p><p class="game-header-desc">Set a secret code, then race to crack theirs first.</p></div>
+    </div>
+    <div class="settings-wrap">
+      <div class="settings-col">
+        <div class="settings-block anim-in" style="animation-delay:.08s">
+          <p class="block-title">Room settings</p>
+          <div class="field">
+            <label>Room name</label>
+            <input type="text" id="gc-room-name" placeholder="e.g. Code duel" maxlength="32"/>
+          </div>
+          <div class="field">
+            <label>Room code</label>
+            <div class="code-display">
+              <span class="code-val" id="gc-code">——————</span>
+              <button class="copy-btn" onclick="copyCode('gc-code')">Copy</button>
+            </div>
+            <span class="hint">Share with friends to join directly.</span>
+          </div>
+          <div class="field">
+            <div class="toggle-row">
+              <div><p class="toggle-label">Private room</p><p class="toggle-sub">Hidden from public lobby</p></div>
+              <label class="toggle"><input type="checkbox" id="gc-private"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
+          <div class="field">
+            <label>Players <span class="p-range">(always 2)</span></label>
+            <div class="player-picker">
+              <button class="p-btn" disabled>−</button><span class="p-val">2</span><button class="p-btn" disabled>+</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Opponent</label>
+            <div class="seg" id="gc-opp-seg">
+              <button class="seg-opt active" onclick="setSeg('gc-opp-seg',this,'gc-opp','ai')">vs AI</button>
+              <button class="seg-opt" onclick="setSeg('gc-opp-seg',this,'gc-opp','local')">Pass &amp; Play</button>
+              <button class="seg-opt" onclick="setSeg('gc-opp-seg',this,'gc-opp','online')">Online</button>
+            </div>
+            <span class="hint" id="gc-opp-hint">AI takes its turn automatically.</span>
+          </div>
+        </div>
+      </div>
+      <div class="settings-col">
+        <div class="settings-block anim-in" style="animation-delay:.14s">
+          <p class="block-title">Game settings</p>
+          <div class="field">
+            <label>Code length</label>
+            <div class="seg" id="gc-length-seg">
+              <button class="seg-opt" onclick="setSeg('gc-length-seg',this,'gc-length','3')">3</button>
+              <button class="seg-opt active" onclick="setSeg('gc-length-seg',this,'gc-length','4')">4</button>
+              <button class="seg-opt" onclick="setSeg('gc-length-seg',this,'gc-length','5')">5</button>
+              <button class="seg-opt" onclick="setSeg('gc-length-seg',this,'gc-length','6')">6</button>
+            </div>
+            <span class="hint">Digits 0–9, repeats allowed. Longer = harder.</span>
+          </div>
+          <div class="field">
+            <div class="toggle-row">
+              <div><p class="toggle-label">"Present" hint</p><p class="toggle-sub">Also show how many digits are right but in the wrong spot</p></div>
+              <label class="toggle"><input type="checkbox" id="gc-hint"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-actions anim-in" style="animation-delay:.2s">
+      <button class="btn-cancel" onclick="showScreen('create')">Cancel</button>
+      <button class="btn-create" onclick="gcStartGame()">Create room →</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ SETTINGS — HANGMAN ═══ -->
 <div id="screen-settings-hangman" class="screen">
   <nav class="nav">
@@ -824,6 +929,66 @@ canvas#wheelCanvas{border-radius:50%;display:block}
     <div style="display:flex;gap:12px;margin-top:20px;width:100%">
       <button class="btn-cancel" style="flex:1" onclick="showScreen('settings-hangman')">Back</button>
       <button class="btn-create" style="flex:2" onclick="hmConfirmWord()">Start game →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GUESS THE CODE — SET CODE ═══ -->
+<div id="screen-guesscode-setcode" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
+    <button class="nav-back" onclick="goHome()">← Back</button>
+  </nav>
+  <div class="inner" style="max-width:520px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center">
+    <div style="font-size:48px;margin-bottom:16px">🔐</div>
+    <h2 style="font-size:22px;font-weight:700;margin-bottom:8px" id="gc-setcode-title">Set your secret code</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:32px" id="gc-setcode-sub">Type your code below. Pass the device when done — they won't see it.</p>
+    <div class="settings-block" style="width:100%;padding:24px;text-align:left" id="gc-setcode-form">
+      <div class="field">
+        <label id="gc-setcode-label">Secret code</label>
+        <input type="password" id="gc-secret-input" class="custom-word-input" placeholder="Type digits…" inputmode="numeric" autocomplete="off" style="width:100%;font-size:18px;letter-spacing:0.2em"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+          onkeydown="if(event.key==='Enter') gcSubmitCode()"/>
+      </div>
+      <div id="gc-setcode-hint" style="font-size:12px;color:var(--muted);font-family:var(--mono);margin-top:2px"></div>
+    </div>
+    <p id="gc-waiting-msg" style="display:none;font-size:14px;color:var(--accent);font-weight:600"></p>
+    <div style="display:flex;gap:12px;margin-top:20px;width:100%" id="gc-setcode-actions">
+      <button class="btn-cancel" style="flex:1" onclick="goHome()">Cancel</button>
+      <button class="btn-create" style="flex:2" onclick="gcSubmitCode()">Lock in code →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ GUESS THE CODE — PLAY ═══ -->
+<div id="screen-guesscode" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
+    <span id="gc-nav-center" style="font-family:var(--mono);font-size:12px;color:var(--muted)"></span>
+    <button class="nav-back" onclick="confirmQuit()">Quit</button>
+  </nav>
+  <div class="game-area">
+    <div class="game-status-bar">
+      <div class="status-center" id="gc-status-msg" style="flex:1">—</div>
+    </div>
+    <p id="gc-online-banner" style="display:none;text-align:center;font-size:12px;color:var(--yellow);margin-bottom:14px"></p>
+    <div class="gc-layout">
+      <div class="gc-side">
+        <p class="gc-side-label" id="gc-mine-label">Your progress cracking their code</p>
+        <div class="gc-slots" id="gc-slots-mine"></div>
+        <div class="gc-history" id="gc-history-mine"></div>
+      </div>
+      <div class="gc-guess-row" id="gc-guess-row">
+        <input class="gc-guess-input" id="gc-guess-input" maxlength="6" inputmode="numeric" placeholder="Guess…"
+          oninput="this.value=this.value.replace(/[^0-9]/g,'')"
+          onkeydown="if(event.key==='Enter') gcSubmitGuess()"/>
+        <button class="gc-guess-btn" id="gc-guess-btn" onclick="gcSubmitGuess()">Guess</button>
+      </div>
+      <div class="gc-side">
+        <p class="gc-side-label" id="gc-theirs-label">Their progress cracking your code</p>
+        <div class="gc-slots" id="gc-slots-theirs"></div>
+        <div class="gc-history" id="gc-history-theirs"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1214,8 +1379,10 @@ function genCode() {
   return Array.from({length:6}, () => c[Math.floor(Math.random()*c.length)]).join('');
 }
 
+const GAME_ID_PREFIX = { hangman: 'hm', guesscode: 'gc' };
+
 function openSettings(game) {
-  const codeId = game === 'hangman' ? 'hm-code' : game + '-code';
+  const codeId = (GAME_ID_PREFIX[game] || game) + '-code';
   const codeEl = document.getElementById(codeId);
   if (codeEl) codeEl.textContent = genCode();
   showScreen('settings-' + game);
@@ -1298,10 +1465,9 @@ function encodeCells(cells) { return cells ? cells.map(([r,c]) => ({r,c})) : nul
 function decodeCells(cells) { return cells ? cells.map(o => [o.r, o.c]) : null; }
 
 function startOnlineRoom(game) {
-  const roomNameId = game === 'hangman' ? 'hm-room-name' : game + '-room-name';
-  const privateId = game === 'hangman' ? 'hm-private' : game + '-private';
-  const roomNameEl = document.getElementById(roomNameId);
-  const privateEl = document.getElementById(privateId);
+  const prefix = GAME_ID_PREFIX[game] || game;
+  const roomNameEl = document.getElementById(prefix + '-room-name');
+  const privateEl = document.getElementById(prefix + '-private');
   const roomName = (roomNameEl && roomNameEl.value.trim()) || 'Game room';
   const isPrivate = !!(privateEl && privateEl.checked);
 
@@ -1315,6 +1481,14 @@ function startOnlineRoom(game) {
   } else if (game === 'hangman') {
     settings = { category: HM.category, maxWrong: HM.maxWrong, rounds: HM.rounds, wordSource: HM.wordSource };
     initialState = { word: '', guessed: [], wrong: 0, hmState: 'idle', currentRound: 1 };
+  } else if (game === 'guesscode') {
+    settings = { length: GC.length, hintMode: GC.hintMode };
+    initialState = {
+      phase: 'setting', p1Code: '', p2Code: '',
+      revealedP1: Array(GC.length).fill(null), revealedP2: Array(GC.length).fill(null),
+      guessesP1: [], guessesP2: [], currentPlayer: 1, winner: null,
+      codesSubmitted: {1: false, 2: false}
+    };
   }
 
   netCreateRoom(game, roomName, isPrivate, settings, initialState).then(() => {
@@ -1354,7 +1528,7 @@ function attemptJoin(code) {
 }
 
 function showWaitingScreen(code, game) {
-  const names = { four: '4 in a Row', ttt: 'Tic Tac Toe', hangman: 'Hangman' };
+  const names = { four: '4 in a Row', ttt: 'Tic Tac Toe', hangman: 'Hangman', guesscode: 'Guess the Code' };
   document.getElementById('waiting-code').textContent = code;
   document.getElementById('waiting-title').textContent = 'Waiting for a friend…';
   document.getElementById('waiting-sub').textContent = `Share this code so a friend can join your ${names[game] || 'game'} room.`;
@@ -1382,6 +1556,7 @@ function onRoomUpdate(room) {
   if (room.game === 'four') fourApplyRemote(room);
   else if (room.game === 'ttt') tttApplyRemote(room);
   else if (room.game === 'hangman') hmApplyRemote(room);
+  else if (room.game === 'guesscode') gcApplyRemote(room);
   updateDisconnectBanner(room);
 }
 
@@ -2077,6 +2252,7 @@ function showResult(w){
 
 function rematch(){
   document.getElementById('result-overlay').style.display='none';
+  if (S.game === 'guesscode') { gcRematch(); return; }
   if (S.opponent === 'online') { netRematch(); return; }
   S.scores=[0,0];S.gamesPlayed=0;S.currentPlayer=1;initRound();
 }
@@ -2439,6 +2615,16 @@ let HM = {
   wordSource:'random', players:2
 };
 
+let GC = {
+  length: 4, hintMode: false, opponent: 'ai',
+  p1Code: '', p2Code: '',
+  revealedP1: [], revealedP2: [],
+  guessesP1: [], guessesP2: [],
+  currentPlayer: 1, phase: 'setting', winner: null,
+  codesSubmitted: {1: false, 2: false},
+  settingSeat: 1
+};
+
 // ── Settings helpers ──
 let hmPlayerCount = 2;
 function hmChangeP(delta) {
@@ -2693,6 +2879,333 @@ document.addEventListener('keydown', e => {
 });
 
 // ═══════════════════════════════════════════
+//  GUESS THE CODE
+// ═══════════════════════════════════════════
+function gcScoreGuess(guess, secret) {
+  const n = secret.length;
+  const exact = new Array(n).fill(false);
+  const secretRemain = [], guessRemain = [];
+  for (let i = 0; i < n; i++) {
+    if (guess[i] === secret[i]) exact[i] = true;
+    else { secretRemain.push(secret[i]); guessRemain.push(guess[i]); }
+  }
+  const freq = {};
+  secretRemain.forEach(d => freq[d] = (freq[d]||0) + 1);
+  let present = 0;
+  guessRemain.forEach(d => { if (freq[d] > 0) { present++; freq[d]--; } });
+  return { exact, exactCount: exact.filter(Boolean).length, present };
+}
+
+function gcRandomCode(len) {
+  return Array.from({length: len}, () => String(Math.floor(Math.random()*10))).join('');
+}
+
+function gcStartGame() {
+  GC.length = parseInt(cfg['gc-length'] || '4');
+  GC.hintMode = !!document.getElementById('gc-hint').checked;
+  GC.opponent = cfg['gc-opp'] || 'ai';
+  GC.p1Code = ''; GC.p2Code = '';
+  GC.revealedP1 = Array(GC.length).fill(null);
+  GC.revealedP2 = Array(GC.length).fill(null);
+  GC.guessesP1 = []; GC.guessesP2 = [];
+  GC.currentPlayer = 1; GC.phase = 'setting'; GC.winner = null;
+  GC.codesSubmitted = {1: false, 2: false};
+  GC.settingSeat = 1;
+  S.game = 'guesscode'; S.opponent = GC.opponent; S._gcResultShown = false;
+
+  if (GC.opponent === 'online') { startOnlineRoom('guesscode'); return; }
+
+  if (GC.opponent === 'ai') GC.p2Code = gcRandomCode(GC.length);
+  gcShowSetCodeScreen();
+}
+
+function gcShowSetCodeScreen() {
+  const title = document.getElementById('gc-setcode-title');
+  const sub = document.getElementById('gc-setcode-sub');
+  const label = document.getElementById('gc-setcode-label');
+  const input = document.getElementById('gc-secret-input');
+  const hint = document.getElementById('gc-setcode-hint');
+  const form = document.getElementById('gc-setcode-form');
+  const actions = document.getElementById('gc-setcode-actions');
+  const waitingMsg = document.getElementById('gc-waiting-msg');
+  input.value = ''; hint.textContent = ''; input.maxLength = GC.length;
+  form.style.display = ''; actions.style.display = 'flex'; waitingMsg.style.display = 'none';
+
+  title.textContent = GC.opponent === 'local'
+    ? `Player ${GC.settingSeat}, set your secret code`
+    : 'Set your secret code';
+  sub.textContent = `Type a ${GC.length}-digit code (0–9). Pass the device when done — they won't see it.`;
+  label.textContent = `Your ${GC.length}-digit code`;
+  showScreen('guesscode-setcode');
+}
+
+function gcSubmitCode() {
+  const input = document.getElementById('gc-secret-input');
+  const hint = document.getElementById('gc-setcode-hint');
+  const val = (input.value || '').trim();
+  if (!/^\d+$/.test(val) || val.length !== GC.length) {
+    hint.textContent = `⚠ Enter exactly ${GC.length} digits (0–9).`;
+    return;
+  }
+
+  if (GC.opponent === 'online') { netSubmitCode(val); return; }
+
+  if (GC.opponent === 'local' && GC.settingSeat === 1) {
+    GC.p1Code = val;
+    GC.settingSeat = 2;
+    gcShowSetCodeScreen();
+    return;
+  }
+  if (GC.opponent === 'local') GC.p2Code = val;
+  else GC.p1Code = val; // ai mode
+
+  GC.phase = 'guessing';
+  GC.currentPlayer = 1;
+  showScreen('guesscode');
+  gcRender();
+}
+
+function gcSubmitGuess() {
+  if (GC.phase !== 'guessing') return;
+  const input = document.getElementById('gc-guess-input');
+  const val = (input.value || '').trim();
+  if (!/^\d+$/.test(val) || val.length !== GC.length) {
+    input.style.borderColor = 'var(--accent2)';
+    setTimeout(() => { input.style.borderColor = ''; }, 900);
+    return;
+  }
+
+  if (GC.opponent === 'online') {
+    if (GC.currentPlayer !== NET.seat) return;
+    netGuessCode(val);
+    input.value = '';
+    return;
+  }
+  if (GC.opponent === 'ai' && GC.currentPlayer !== 1) return;
+  input.value = '';
+  gcApplyGuessLocal(GC.currentPlayer, val);
+}
+
+function gcApplyGuessLocal(guesserSeat, guessStr) {
+  const secretStr = guesserSeat === 1 ? GC.p2Code : GC.p1Code;
+  const guess = guessStr.split(''), secret = secretStr.split('');
+  const { exact, exactCount, present } = gcScoreGuess(guess, secret);
+  const revealedKey = guesserSeat === 1 ? 'revealedP2' : 'revealedP1';
+  const guessesKey = guesserSeat === 1 ? 'guessesP1' : 'guessesP2';
+  const revealed = GC[revealedKey].slice();
+  for (let i = 0; i < revealed.length; i++) if (exact[i]) revealed[i] = guess[i];
+  GC[revealedKey] = revealed;
+  GC[guessesKey] = [...GC[guessesKey], { guess: guessStr, exactCount, present }];
+  const won = revealed.every(d => d !== null);
+  if (won) { GC.phase = 'finished'; GC.winner = guesserSeat; }
+  else GC.currentPlayer = guesserSeat === 1 ? 2 : 1;
+  gcRender();
+  if (GC.phase === 'finished') {
+    setTimeout(() => gcShowResult(GC.winner), 300);
+  } else if (GC.opponent === 'ai' && GC.currentPlayer === 2) {
+    gcScheduleAI();
+  }
+}
+
+function gcScheduleAI() {
+  setTimeout(() => {
+    if (GC.phase !== 'guessing' || GC.currentPlayer !== 2) return;
+    const guessArr = GC.revealedP1.map(d => d !== null ? d : String(Math.floor(Math.random()*10)));
+    gcApplyGuessLocal(2, guessArr.join(''));
+  }, 900);
+}
+
+function renderGcSlots(containerId, revealedArr) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = (revealedArr || []).map(d =>
+    `<div class="gc-slot ${d !== null ? 'revealed' : ''}">${d !== null ? d : '?'}</div>`
+  ).join('');
+}
+
+function renderGcHistory(containerId, guesses) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (!guesses || !guesses.length) { el.innerHTML = '<p style="opacity:0.5">No guesses yet.</p>'; return; }
+  el.innerHTML = guesses.slice().reverse().map(g =>
+    `<div class="gc-history-row"><span class="gc-history-code">${g.guess}</span><span>${g.exactCount} exact${GC.hintMode ? ', ' + g.present + ' present' : ''}</span></div>`
+  ).join('');
+}
+
+function gcRender() {
+  let mySeat, oppSeat;
+  if (GC.opponent === 'online') { mySeat = NET.seat; oppSeat = mySeat === 1 ? 2 : 1; }
+  else { mySeat = 1; oppSeat = 2; }
+
+  const mineRevealedKey = mySeat === 1 ? 'revealedP2' : 'revealedP1';
+  const mineGuessesKey = mySeat === 1 ? 'guessesP1' : 'guessesP2';
+  const theirsRevealedKey = mySeat === 1 ? 'revealedP1' : 'revealedP2';
+  const theirsGuessesKey = mySeat === 1 ? 'guessesP2' : 'guessesP1';
+
+  document.getElementById('gc-mine-label').textContent = GC.opponent === 'local'
+    ? `Player ${mySeat} cracking Player ${oppSeat}'s code`
+    : `Your progress cracking ${GC.opponent === 'ai' ? "the AI's" : "their"} code`;
+  document.getElementById('gc-theirs-label').textContent = GC.opponent === 'local'
+    ? `Player ${oppSeat} cracking Player ${mySeat}'s code`
+    : `${GC.opponent === 'ai' ? "The AI's" : "Their"} progress cracking your code`;
+
+  renderGcSlots('gc-slots-mine', GC[mineRevealedKey]);
+  renderGcSlots('gc-slots-theirs', GC[theirsRevealedKey]);
+  renderGcHistory('gc-history-mine', GC[mineGuessesKey]);
+  renderGcHistory('gc-history-theirs', GC[theirsGuessesKey]);
+
+  const msg = document.getElementById('gc-status-msg');
+  if (GC.phase === 'finished') {
+    msg.textContent = 'Game over'; msg.className = 'status-center';
+  } else if (GC.opponent === 'local') {
+    msg.textContent = `Player ${GC.currentPlayer}'s turn to guess`; msg.className = 'status-center';
+  } else if (GC.opponent === 'online') {
+    const mine = GC.currentPlayer === NET.seat;
+    msg.textContent = mine ? '⬆ Your turn to guess' : 'Waiting for the other player…';
+    msg.className = 'status-center' + (mine ? ' active-turn' : '');
+  } else {
+    const mine = GC.currentPlayer === 1;
+    msg.textContent = mine ? '⬆ Your turn to guess' : 'AI is thinking…';
+    msg.className = 'status-center' + (mine ? ' active-turn' : '');
+  }
+
+  const canGuess = GC.phase === 'guessing' && (
+    GC.opponent === 'local' ||
+    (GC.opponent === 'ai' && GC.currentPlayer === 1) ||
+    (GC.opponent === 'online' && GC.currentPlayer === NET.seat)
+  );
+  const guessInput = document.getElementById('gc-guess-input');
+  guessInput.disabled = !canGuess;
+  guessInput.maxLength = GC.length;
+  document.getElementById('gc-guess-btn').disabled = !canGuess;
+}
+
+function gcShowResult(winner) {
+  const mySeat = GC.opponent === 'online' ? NET.seat : 1;
+  const iWon = winner === mySeat;
+  const winnerName = GC.opponent === 'ai' ? (winner === 1 ? 'You' : 'The AI')
+    : GC.opponent === 'online' ? (iWon ? 'You' : 'The other player')
+    : `Player ${winner}`;
+  document.getElementById('result-emoji').textContent = (iWon || GC.opponent === 'local') ? '🎉' : '💀';
+  document.getElementById('result-title').textContent = `${winnerName} cracked the code!`;
+  document.getElementById('result-sub').textContent = GC.opponent === 'local' ? 'Nice work.' : (iWon ? 'Well played!' : 'Better luck next time.');
+  document.getElementById('result-overlay').style.display = 'flex';
+}
+
+function gcRematch() {
+  if (GC.opponent === 'online') { netGCRematch(); return; }
+  GC.p1Code = ''; GC.p2Code = '';
+  GC.revealedP1 = Array(GC.length).fill(null);
+  GC.revealedP2 = Array(GC.length).fill(null);
+  GC.guessesP1 = []; GC.guessesP2 = [];
+  GC.currentPlayer = 1; GC.phase = 'setting'; GC.winner = null;
+  GC.settingSeat = 1;
+  if (GC.opponent === 'ai') GC.p2Code = gcRandomCode(GC.length);
+  gcShowSetCodeScreen();
+}
+
+function netSubmitCode(val) {
+  const seat = NET.seat;
+  netUpdateState(state => {
+    const codesSubmitted = { ...(state.codesSubmitted || {}) };
+    if (codesSubmitted[seat]) return state;
+    codesSubmitted[seat] = true;
+    const newState = { ...state, codesSubmitted };
+    newState['p' + seat + 'Code'] = val;
+    if (codesSubmitted[1] && codesSubmitted[2]) {
+      newState.phase = 'guessing';
+      newState.currentPlayer = 1;
+    }
+    return newState;
+  });
+}
+
+function netGuessCode(val) {
+  const guesserSeat = NET.seat, length = GC.length;
+  netUpdateState(state => {
+    if (state.phase !== 'guessing' || state.currentPlayer !== guesserSeat) return state;
+    const secretStr = guesserSeat === 1 ? state.p2Code : state.p1Code;
+    const guess = val.split(''), secret = secretStr.split('');
+    const { exact, exactCount, present } = gcScoreGuess(guess, secret);
+    const revealedKey = guesserSeat === 1 ? 'revealedP2' : 'revealedP1';
+    const guessesKey = guesserSeat === 1 ? 'guessesP1' : 'guessesP2';
+    const revealed = (state[revealedKey] || Array(length).fill(null)).slice();
+    for (let i = 0; i < revealed.length; i++) if (exact[i]) revealed[i] = guess[i];
+    const guesses = [...(state[guessesKey] || []), { guess: val, exactCount, present }];
+    const won = revealed.every(d => d !== null);
+    return {
+      ...state,
+      [revealedKey]: revealed,
+      [guessesKey]: guesses,
+      phase: won ? 'finished' : 'guessing',
+      winner: won ? guesserSeat : null,
+      currentPlayer: won ? state.currentPlayer : (guesserSeat === 1 ? 2 : 1)
+    };
+  });
+}
+
+function netGCRematch() {
+  const len = GC.length;
+  netUpdateState(state => ({
+    ...state,
+    phase: 'setting', p1Code: '', p2Code: '',
+    revealedP1: Array(len).fill(null), revealedP2: Array(len).fill(null),
+    guessesP1: [], guessesP2: [], currentPlayer: 1, winner: null,
+    codesSubmitted: {1: false, 2: false}
+  }));
+}
+
+function gcApplyRemote(room) {
+  const st = room.state;
+  if (!st) return;
+  S.game = 'guesscode'; S.opponent = 'online';
+  GC.length = room.settings.length;
+  GC.hintMode = room.settings.hintMode;
+  GC.opponent = 'online';
+  GC.phase = st.phase;
+  GC.p1Code = st.p1Code; GC.p2Code = st.p2Code;
+  GC.revealedP1 = st.revealedP1 || Array(GC.length).fill(null);
+  GC.revealedP2 = st.revealedP2 || Array(GC.length).fill(null);
+  GC.guessesP1 = st.guessesP1 || []; GC.guessesP2 = st.guessesP2 || [];
+  GC.currentPlayer = st.currentPlayer;
+  GC.winner = st.winner;
+  GC.codesSubmitted = st.codesSubmitted || {1: false, 2: false};
+
+  if (GC.phase === 'setting') {
+    const mySubmitted = !!GC.codesSubmitted[NET.seat];
+    document.getElementById('gc-setcode-title').textContent = 'Set your secret code';
+    document.getElementById('gc-setcode-sub').textContent = `Type a ${GC.length}-digit code — your opponent won't see it.`;
+    document.getElementById('gc-setcode-label').textContent = `Your ${GC.length}-digit code`;
+    document.getElementById('gc-secret-input').maxLength = GC.length;
+    const form = document.getElementById('gc-setcode-form');
+    const actions = document.getElementById('gc-setcode-actions');
+    const waitingMsg = document.getElementById('gc-waiting-msg');
+    if (mySubmitted) {
+      form.style.display = 'none'; actions.style.display = 'none';
+      waitingMsg.style.display = 'block';
+      waitingMsg.textContent = 'Waiting for the other player to set their code…';
+    } else {
+      form.style.display = ''; actions.style.display = 'flex'; waitingMsg.style.display = 'none';
+      document.getElementById('gc-secret-input').value = '';
+      document.getElementById('gc-setcode-hint').textContent = '';
+    }
+    showScreen('guesscode-setcode');
+    return;
+  }
+
+  showScreen('guesscode');
+  gcRender();
+  if (GC.phase === 'finished') {
+    if (!S._gcResultShown) {
+      S._gcResultShown = true;
+      setTimeout(() => gcShowResult(GC.winner), 300);
+    }
+  } else {
+    S._gcResultShown = false;
+  }
+}
+
+// ═══════════════════════════════════════════
 //  DICE ROLLER
 // ═══════════════════════════════════════════
 let DICE = { sides: 6, count: 2, rolling: false, history: [], lastRolls: [] };
@@ -2787,7 +3300,7 @@ function renderPublicRooms(rooms) {
   const el = document.getElementById('rooms-list');
   if (!el) return;
   if (!rooms.length) { el.innerHTML = '<p class="hint">No open rooms right now — create one!</p>'; return; }
-  const names = { four: '4 in a Row', ttt: 'Tic Tac Toe', hangman: 'Hangman' };
+  const names = { four: '4 in a Row', ttt: 'Tic Tac Toe', hangman: 'Hangman', guesscode: 'Guess the Code' };
   el.innerHTML = rooms.map(r => {
     const count = Object.keys(r.players || {}).length;
     return `<div class="room-card" onclick="joinRoomFromLobby('${r.code}')">

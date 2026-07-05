@@ -16,6 +16,11 @@ Firestore database (see "Online multiplayer" below).
     5×5), best-of-1/3/5 series, and a minimax AI opponent.
   - **Hangman** — guess a word letter by letter, with category word lists
     or a custom word set by another player. Supports 2–8 players.
+  - **Guess the Code** — both players secretly set a numeric code (3–6
+    digits, room owner picks the length); then take alternating turns
+    guessing each other's code. Correctly-placed digits light up green and
+    stay revealed. Optional "present" hint shows how many guessed digits
+    exist elsewhere in the code, classic-Mastermind style.
   - Each game supports **vs AI**, local **Pass & Play**, or **Online**.
 - **Tools hub**
   - **Spin the Wheel** — add custom items/names and spin for a random pick,
@@ -38,11 +43,12 @@ security rules governing it).
   just alternate starting with the host, since syncing a countdown fairly
   across two clocks needs a server-authoritative timer this project doesn't
   have.
-- Hangman's secret word lives in the shared room document so every
-  connected client can render/check guesses against it — a guesser who opens
-  their browser's network tab could technically read it early. Same trust
-  model as the rest of the site: whoever has the room code can see
-  everything in that room.
+- Hangman's secret word, and both players' secret codes in Guess the Code,
+  live in the shared room document so the other client can check guesses
+  against them — a player who opens their browser's network tab could
+  technically read the opponent's secret early. Same trust model as the
+  rest of the site: whoever has the room code can see everything in that
+  room.
 - No presence/cleanup service: a "may have disconnected" banner appears if a
   player's heartbeat goes stale (~20s), but there's no auto-forfeit, and
   finished/abandoned rooms aren't automatically purged from Firestore.

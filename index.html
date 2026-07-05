@@ -787,6 +787,12 @@ canvas#wheelCanvas{border-radius:50%;display:block}
               <label class="toggle"><input type="checkbox" id="gc-hint"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
             </div>
           </div>
+          <div class="field">
+            <div class="toggle-row">
+              <div><p class="toggle-label">Notes</p><p class="toggle-sub">Keep a visible list of past guesses and how many were exact</p></div>
+              <label class="toggle"><input type="checkbox" id="gc-notes" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1482,7 +1488,7 @@ function startOnlineRoom(game) {
     settings = { category: HM.category, maxWrong: HM.maxWrong, rounds: HM.rounds, wordSource: HM.wordSource };
     initialState = { word: '', guessed: [], wrong: 0, hmState: 'idle', currentRound: 1 };
   } else if (game === 'guesscode') {
-    settings = { length: GC.length, hintMode: GC.hintMode };
+    settings = { length: GC.length, hintMode: GC.hintMode, notesMode: GC.notesMode };
     initialState = {
       phase: 'setting', p1Code: '', p2Code: '',
       revealedP1: Array(GC.length).fill(null), revealedP2: Array(GC.length).fill(null),
@@ -2616,7 +2622,7 @@ let HM = {
 };
 
 let GC = {
-  length: 4, hintMode: false, opponent: 'ai',
+  length: 4, hintMode: false, notesMode: true, opponent: 'ai',
   p1Code: '', p2Code: '',
   revealedP1: [], revealedP2: [],
   guessesP1: [], guessesP2: [],
@@ -2903,6 +2909,7 @@ function gcRandomCode(len) {
 function gcStartGame() {
   GC.length = parseInt(cfg['gc-length'] || '4');
   GC.hintMode = !!document.getElementById('gc-hint').checked;
+  GC.notesMode = !!document.getElementById('gc-notes').checked;
   GC.opponent = cfg['gc-opp'] || 'ai';
   GC.p1Code = ''; GC.p2Code = '';
   GC.revealedP1 = Array(GC.length).fill(null);
@@ -3051,8 +3058,12 @@ function gcRender() {
 
   renderGcSlots('gc-slots-mine', GC[mineRevealedKey]);
   renderGcSlots('gc-slots-theirs', GC[theirsRevealedKey]);
-  renderGcHistory('gc-history-mine', GC[mineGuessesKey]);
-  renderGcHistory('gc-history-theirs', GC[theirsGuessesKey]);
+  document.getElementById('gc-history-mine').style.display = GC.notesMode ? '' : 'none';
+  document.getElementById('gc-history-theirs').style.display = GC.notesMode ? '' : 'none';
+  if (GC.notesMode) {
+    renderGcHistory('gc-history-mine', GC[mineGuessesKey]);
+    renderGcHistory('gc-history-theirs', GC[theirsGuessesKey]);
+  }
 
   const msg = document.getElementById('gc-status-msg');
   if (GC.phase === 'finished') {
@@ -3161,6 +3172,7 @@ function gcApplyRemote(room) {
   S.game = 'guesscode'; S.opponent = 'online';
   GC.length = room.settings.length;
   GC.hintMode = room.settings.hintMode;
+  GC.notesMode = room.settings.notesMode !== false;
   GC.opponent = 'online';
   GC.phase = st.phase;
   GC.p1Code = st.p1Code; GC.p2Code = st.p2Code;

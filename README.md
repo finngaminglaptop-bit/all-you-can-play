@@ -20,7 +20,9 @@ Firestore database (see "Online multiplayer" below).
     digits, room owner picks the length); then take alternating turns
     guessing each other's code. Correctly-placed digits light up green and
     stay revealed. Optional "present" hint shows how many guessed digits
-    exist elsewhere in the code, classic-Mastermind style.
+    exist elsewhere in the code, classic-Mastermind style. "Notes" toggle
+    controls whether a running list of past guesses and their exact-match
+    counts stays visible.
   - Each game supports **vs AI**, local **Pass & Play**, or **Online**.
 - **Tools hub**
   - **Spin the Wheel** — add custom items/names and spin for a random pick,

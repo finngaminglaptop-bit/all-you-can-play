@@ -429,10 +429,13 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 @keyframes slideIn{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
 .anim-in{opacity:0;animation:fadeUp 0.45s ease forwards}
+.app-version{position:fixed;bottom:8px;right:10px;font-family:var(--mono);font-size:10px;
+  color:rgba(240,238,255,0.28);z-index:500;pointer-events:none;letter-spacing:0.03em}
 </style>
 </head>
 <body>
 <div class="grid-bg"></div>
+<div class="app-version">Version 1</div>
 
 <!-- ═══ INTRO ═══ -->
 <div id="screen-intro" class="screen active">

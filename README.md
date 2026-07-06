@@ -25,10 +25,14 @@ Firestore database (see "Online multiplayer" below).
     and their exact-match counts stays visible. Optional per-turn timer
     (host-configurable) skips a turn if it runs out — this one works in
     online mode too, synced off a shared turn-start timestamp rather than
-    each client's own clock. Your own code stays visible the whole game;
-    once the match ends, a "Reveal my code" button lets you show it to the
-    other player before the result screen appears (which shows itself
-    after a short delay, so there's time to look).
+    each client's own clock (each side counts down from when *it* saw the
+    turn begin, so the two players' clocks disagreeing doesn't throw the
+    countdown off). Your own code stays visible the whole game; guesses can
+    be typed in ahead of your turn, though submitting still waits for it.
+    Once the match ends, nothing is forced — the result and "Play
+    again"/"Main menu" options appear inline at the bottom of the same
+    screen, so the board (and a "Reveal my code" button) stay up for as
+    long as you want before moving on.
   - Each game supports **vs AI**, local **Pass & Play**, or **Online**.
 - **Tools hub**
   - **Spin the Wheel** — add custom items/names and spin for a random pick,
@@ -58,9 +62,13 @@ security rules governing it).
   technically read the opponent's secret early. Same trust model as the
   rest of the site: whoever has the room code can see everything in that
   room.
-- No presence/cleanup service: a "may have disconnected" banner appears if a
-  player's heartbeat goes stale (~20s), but there's no auto-forfeit, and
-  finished/abandoned rooms aren't automatically purged from Firestore.
+- A player explicitly leaving (Quit/Leave room) ends the game immediately
+  for whoever's left, across all online games. A merely-stale connection
+  (closed laptop, dead wifi) is softer: only a "may have disconnected"
+  banner appears (~20s of no heartbeat) — there's no forced forfeit for
+  that case, since a stale heartbeat can't be told apart from someone just
+  thinking. Finished/abandoned rooms aren't automatically purged from
+  Firestore either way.
 - Reconnecting after a refresh works within the same browser tab (via
   `sessionStorage`) — closing the tab or switching devices mid-game loses
   your seat.

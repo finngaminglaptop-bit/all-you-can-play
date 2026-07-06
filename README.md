@@ -17,12 +17,18 @@ Firestore database (see "Online multiplayer" below).
   - **Hangman** — guess a word letter by letter, with category word lists
     or a custom word set by another player. Supports 2–8 players.
   - **Guess the Code** — both players secretly set a numeric code (3–6
-    digits, room owner picks the length); then take alternating turns
-    guessing each other's code. Correctly-placed digits light up green and
-    stay revealed. Optional "present" hint shows how many guessed digits
-    exist elsewhere in the code, classic-Mastermind style. "Notes" toggle
-    controls whether a running list of past guesses and their exact-match
-    counts stays visible.
+    digits, room owner picks the length); a random player goes first, then
+    turns alternate guessing each other's code. Correctly-placed digits
+    light up green and stay revealed. Optional "present" hint shows how
+    many guessed digits exist elsewhere in the code, classic-Mastermind
+    style. "Notes" toggle controls whether a running list of past guesses
+    and their exact-match counts stays visible. Optional per-turn timer
+    (host-configurable) skips a turn if it runs out — this one works in
+    online mode too, synced off a shared turn-start timestamp rather than
+    each client's own clock. Your own code stays visible the whole game;
+    once the match ends, a "Reveal my code" button lets you show it to the
+    other player before the result screen appears (which shows itself
+    after a short delay, so there's time to look).
   - Each game supports **vs AI**, local **Pass & Play**, or **Online**.
 - **Tools hub**
   - **Spin the Wheel** — add custom items/names and spin for a random pick,
@@ -41,10 +47,11 @@ other tools (see `firestore.rules` in the `flashcard-maker` repo for the
 security rules governing it).
 
 **Known limitations, by design (no accounts, no server logic):**
-- Per-turn timers and "random first move" are ignored in online mode — turns
-  just alternate starting with the host, since syncing a countdown fairly
-  across two clocks needs a server-authoritative timer this project doesn't
-  have.
+- 4 in a Row and Tic Tac Toe still ignore per-turn timers and "random first
+  move" in online mode — turns just alternate starting with the host.
+  Guess the Code's timer is the exception: it's synced off a shared
+  `turnStartedAt` timestamp written to the room doc, so both clients count
+  down from the same point rather than trusting their own clock.
 - Hangman's secret word, and both players' secret codes in Guess the Code,
   live in the shared room document so the other client can check guesses
   against them — a player who opens their browser's network tab could

@@ -793,6 +793,16 @@ canvas#wheelCanvas{border-radius:50%;display:block}
               <label class="toggle"><input type="checkbox" id="gc-notes" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
             </div>
           </div>
+          <div class="field">
+            <label>Time limit per turn</label>
+            <div class="seg" id="gc-time-seg">
+              <button class="seg-opt active" onclick="setSeg('gc-time-seg',this,'gc-time','0')">None</button>
+              <button class="seg-opt" onclick="setSeg('gc-time-seg',this,'gc-time','15')">15s</button>
+              <button class="seg-opt" onclick="setSeg('gc-time-seg',this,'gc-time','30')">30s</button>
+              <button class="seg-opt" onclick="setSeg('gc-time-seg',this,'gc-time','60')">60s</button>
+            </div>
+            <span class="hint">Run out of time and your turn is skipped.</span>
+          </div>
         </div>
       </div>
     </div>
@@ -977,7 +987,11 @@ canvas#wheelCanvas{border-radius:50%;display:block}
     <div class="game-status-bar">
       <div class="status-center" id="gc-status-msg" style="flex:1">—</div>
     </div>
+    <div class="timer-bar-wrap" id="gc-timer-bar-wrap" style="display:none">
+      <div class="timer-bar" id="gc-timer-bar"></div>
+    </div>
     <p id="gc-online-banner" style="display:none;text-align:center;font-size:12px;color:var(--yellow);margin-bottom:14px"></p>
+    <p id="gc-mycode-display" style="text-align:center;font-family:var(--mono);font-size:13px;color:var(--muted);margin-bottom:14px"></p>
     <div class="gc-layout">
       <div class="gc-side">
         <p class="gc-side-label" id="gc-mine-label">Your progress cracking their code</p>
@@ -994,6 +1008,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
         <p class="gc-side-label" id="gc-theirs-label">Their progress cracking your code</p>
         <div class="gc-slots" id="gc-slots-theirs"></div>
         <div class="gc-history" id="gc-history-theirs"></div>
+        <button class="gc-guess-btn" id="gc-reveal-btn" style="display:none;margin:10px auto 0" onclick="gcReveal()">Reveal my code</button>
       </div>
     </div>
   </div>
@@ -1194,7 +1209,8 @@ const cfg = {
   'ttt-first': '1', 'ttt-time': '0',
   'ttt-sym1': '✕', 'ttt-sym2': '○',
   'hm-source': 'random', 'hm-category': 'random', 'hm-maxwrong': '6',
-  'hm-rounds': '1', 'hm-mode': 'local'
+  'hm-rounds': '1', 'hm-mode': 'local',
+  'gc-opp': 'ai', 'gc-length': '4', 'gc-time': '0'
 };
 
 // ═══════════════════════════════════════════
@@ -1488,12 +1504,12 @@ function startOnlineRoom(game) {
     settings = { category: HM.category, maxWrong: HM.maxWrong, rounds: HM.rounds, wordSource: HM.wordSource };
     initialState = { word: '', guessed: [], wrong: 0, hmState: 'idle', currentRound: 1 };
   } else if (game === 'guesscode') {
-    settings = { length: GC.length, hintMode: GC.hintMode, notesMode: GC.notesMode };
+    settings = { length: GC.length, hintMode: GC.hintMode, notesMode: GC.notesMode, timeLimit: GC.timeLimit };
     initialState = {
       phase: 'setting', p1Code: '', p2Code: '',
       revealedP1: Array(GC.length).fill(null), revealedP2: Array(GC.length).fill(null),
       guessesP1: [], guessesP2: [], currentPlayer: 1, winner: null,
-      codesSubmitted: {1: false, 2: false}
+      codesSubmitted: {1: false, 2: false}, turnStartedAt: null
     };
   }
 
@@ -2303,6 +2319,7 @@ function confirmQuit(){
 function quitConfirmed(){
   const ov=document.getElementById('quit-overlay');if(ov)ov.remove();
   clearInterval(S.timerInterval);S.gameOver=true;S.aiThinking=false;
+  clearInterval(GC.timerInterval); clearTimeout(GC.aiTimeout);
   if (NET.code) netLeaveRoom();
   showScreen('intro');
 }
@@ -2622,13 +2639,14 @@ let HM = {
 };
 
 let GC = {
-  length: 4, hintMode: false, notesMode: true, opponent: 'ai',
+  length: 4, hintMode: false, notesMode: true, timeLimit: 0, opponent: 'ai',
   p1Code: '', p2Code: '',
   revealedP1: [], revealedP2: [],
   guessesP1: [], guessesP2: [],
   currentPlayer: 1, phase: 'setting', winner: null,
   codesSubmitted: {1: false, 2: false},
-  settingSeat: 1
+  settingSeat: 1,
+  turnStartedAt: null, timerInterval: null, aiTimeout: null
 };
 
 // ── Settings helpers ──
@@ -2910,6 +2928,7 @@ function gcStartGame() {
   GC.length = parseInt(cfg['gc-length'] || '4');
   GC.hintMode = !!document.getElementById('gc-hint').checked;
   GC.notesMode = !!document.getElementById('gc-notes').checked;
+  GC.timeLimit = parseInt(cfg['gc-time'] || '0');
   GC.opponent = cfg['gc-opp'] || 'ai';
   GC.p1Code = ''; GC.p2Code = '';
   GC.revealedP1 = Array(GC.length).fill(null);
@@ -2918,6 +2937,7 @@ function gcStartGame() {
   GC.currentPlayer = 1; GC.phase = 'setting'; GC.winner = null;
   GC.codesSubmitted = {1: false, 2: false};
   GC.settingSeat = 1;
+  GC.turnStartedAt = null; clearInterval(GC.timerInterval); clearTimeout(GC.aiTimeout);
   S.game = 'guesscode'; S.opponent = GC.opponent; S._gcResultShown = false;
 
   if (GC.opponent === 'online') { startOnlineRoom('guesscode'); return; }
@@ -2967,9 +2987,12 @@ function gcSubmitCode() {
   else GC.p1Code = val; // ai mode
 
   GC.phase = 'guessing';
-  GC.currentPlayer = 1;
+  GC.currentPlayer = Math.random() < 0.5 ? 1 : 2;
+  GC.turnStartedAt = Date.now();
   showScreen('guesscode');
   gcRender();
+  if (GC.opponent === 'ai' && GC.currentPlayer === 2) gcScheduleAI();
+  else gcStartTimer();
 }
 
 function gcSubmitGuess() {
@@ -3004,22 +3027,81 @@ function gcApplyGuessLocal(guesserSeat, guessStr) {
   GC[revealedKey] = revealed;
   GC[guessesKey] = [...GC[guessesKey], { guess: guessStr, exactCount, present }];
   const won = revealed.every(d => d !== null);
-  if (won) { GC.phase = 'finished'; GC.winner = guesserSeat; }
-  else GC.currentPlayer = guesserSeat === 1 ? 2 : 1;
+  if (won) {
+    GC.phase = 'finished'; GC.winner = guesserSeat;
+    clearInterval(GC.timerInterval);
+    document.getElementById('gc-timer-bar-wrap').style.display = 'none';
+  } else {
+    GC.currentPlayer = guesserSeat === 1 ? 2 : 1;
+    GC.turnStartedAt = Date.now();
+  }
   gcRender();
   if (GC.phase === 'finished') {
-    setTimeout(() => gcShowResult(GC.winner), 300);
+    setTimeout(() => gcShowResult(GC.winner), 8000);
   } else if (GC.opponent === 'ai' && GC.currentPlayer === 2) {
     gcScheduleAI();
+  } else {
+    gcStartTimer();
   }
 }
 
+function gcStartTimer() {
+  clearInterval(GC.timerInterval);
+  const wrap = document.getElementById('gc-timer-bar-wrap'), bar = document.getElementById('gc-timer-bar');
+  if (!GC.timeLimit || GC.phase !== 'guessing') { if (wrap) wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  const tick = () => {
+    if (GC.phase !== 'guessing') { clearInterval(GC.timerInterval); wrap.style.display = 'none'; return; }
+    const elapsed = (Date.now() - (GC.turnStartedAt || Date.now())) / 1000;
+    const remaining = Math.max(0, GC.timeLimit - elapsed);
+    const pct = (remaining / GC.timeLimit) * 100;
+    bar.style.transition = 'none';
+    bar.style.width = pct + '%';
+    bar.className = 'timer-bar' + (pct < 30 ? ' danger' : pct < 60 ? ' warning' : '');
+    if (remaining <= 0) {
+      clearInterval(GC.timerInterval);
+      if (GC.opponent === 'online') netGcSkipTurn();
+      else gcAutoSkipTurn();
+    }
+  };
+  tick();
+  GC.timerInterval = setInterval(tick, 250);
+}
+
+function gcAutoSkipTurn() {
+  if (GC.phase !== 'guessing') return;
+  GC.currentPlayer = GC.currentPlayer === 1 ? 2 : 1;
+  GC.turnStartedAt = Date.now();
+  gcRender();
+  if (GC.opponent === 'ai' && GC.currentPlayer === 2) gcScheduleAI();
+  else gcStartTimer();
+}
+
+function netGcSkipTurn() {
+  const timeLimit = GC.timeLimit;
+  if (!timeLimit) return;
+  netUpdateState(state => {
+    if (state.phase !== 'guessing') return state;
+    const elapsed = (Date.now() - (state.turnStartedAt || Date.now())) / 1000;
+    if (elapsed < timeLimit) return state;
+    return { ...state, currentPlayer: state.currentPlayer === 1 ? 2 : 1, turnStartedAt: Date.now() };
+  });
+}
+
 function gcScheduleAI() {
-  setTimeout(() => {
+  clearTimeout(GC.aiTimeout);
+  GC.aiTimeout = setTimeout(() => {
     if (GC.phase !== 'guessing' || GC.currentPlayer !== 2) return;
     const guessArr = GC.revealedP1.map(d => d !== null ? d : String(Math.floor(Math.random()*10)));
     gcApplyGuessLocal(2, guessArr.join(''));
   }, 900);
+}
+
+function gcReveal() {
+  if (GC.opponent === 'online') { netGcReveal(); return; }
+  const myCode = GC.p1Code; // fixed P1 perspective for local/ai
+  GC.revealedP1 = myCode.split('');
+  gcRender();
 }
 
 function renderGcSlots(containerId, revealedArr) {
@@ -3065,6 +3147,19 @@ function gcRender() {
     renderGcHistory('gc-history-theirs', GC[theirsGuessesKey]);
   }
 
+  const myCodeEl = document.getElementById('gc-mycode-display');
+  if (GC.opponent === 'local') {
+    myCodeEl.textContent = `Player 1's code: ${GC.p1Code}   ·   Player 2's code: ${GC.p2Code}`;
+  } else {
+    const myCode = mySeat === 1 ? GC.p1Code : GC.p2Code;
+    myCodeEl.textContent = `Your code: ${myCode}`;
+  }
+
+  const revealBtn = document.getElementById('gc-reveal-btn');
+  const theirsArr = GC[theirsRevealedKey] || [];
+  const canReveal = GC.phase === 'finished' && GC.opponent !== 'local' && theirsArr.some(d => d === null);
+  revealBtn.style.display = canReveal ? 'block' : 'none';
+
   const msg = document.getElementById('gc-status-msg');
   if (GC.phase === 'finished') {
     msg.textContent = 'Game over'; msg.className = 'status-center';
@@ -3105,11 +3200,12 @@ function gcShowResult(winner) {
 
 function gcRematch() {
   if (GC.opponent === 'online') { netGCRematch(); return; }
+  clearInterval(GC.timerInterval); clearTimeout(GC.aiTimeout);
   GC.p1Code = ''; GC.p2Code = '';
   GC.revealedP1 = Array(GC.length).fill(null);
   GC.revealedP2 = Array(GC.length).fill(null);
   GC.guessesP1 = []; GC.guessesP2 = [];
-  GC.currentPlayer = 1; GC.phase = 'setting'; GC.winner = null;
+  GC.currentPlayer = 1; GC.phase = 'setting'; GC.winner = null; GC.turnStartedAt = null;
   GC.settingSeat = 1;
   if (GC.opponent === 'ai') GC.p2Code = gcRandomCode(GC.length);
   gcShowSetCodeScreen();
@@ -3125,7 +3221,8 @@ function netSubmitCode(val) {
     newState['p' + seat + 'Code'] = val;
     if (codesSubmitted[1] && codesSubmitted[2]) {
       newState.phase = 'guessing';
-      newState.currentPlayer = 1;
+      newState.currentPlayer = Math.random() < 0.5 ? 1 : 2;
+      newState.turnStartedAt = Date.now();
     }
     return newState;
   });
@@ -3150,9 +3247,17 @@ function netGuessCode(val) {
       [guessesKey]: guesses,
       phase: won ? 'finished' : 'guessing',
       winner: won ? guesserSeat : null,
-      currentPlayer: won ? state.currentPlayer : (guesserSeat === 1 ? 2 : 1)
+      currentPlayer: won ? state.currentPlayer : (guesserSeat === 1 ? 2 : 1),
+      turnStartedAt: won ? (state.turnStartedAt || null) : Date.now()
     };
   });
+}
+
+function netGcReveal() {
+  const mySeat = NET.seat;
+  const codeKey = 'p' + mySeat + 'Code';
+  const revealedKey = mySeat === 1 ? 'revealedP1' : 'revealedP2';
+  netUpdateState(state => ({ ...state, [revealedKey]: (state[codeKey] || '').split('') }));
 }
 
 function netGCRematch() {
@@ -3162,7 +3267,7 @@ function netGCRematch() {
     phase: 'setting', p1Code: '', p2Code: '',
     revealedP1: Array(len).fill(null), revealedP2: Array(len).fill(null),
     guessesP1: [], guessesP2: [], currentPlayer: 1, winner: null,
-    codesSubmitted: {1: false, 2: false}
+    codesSubmitted: {1: false, 2: false}, turnStartedAt: null
   }));
 }
 
@@ -3182,6 +3287,8 @@ function gcApplyRemote(room) {
   GC.currentPlayer = st.currentPlayer;
   GC.winner = st.winner;
   GC.codesSubmitted = st.codesSubmitted || {1: false, 2: false};
+  GC.timeLimit = room.settings.timeLimit || 0;
+  GC.turnStartedAt = st.turnStartedAt || null;
 
   if (GC.phase === 'setting') {
     const mySubmitted = !!GC.codesSubmitted[NET.seat];
@@ -3214,12 +3321,15 @@ function gcApplyRemote(room) {
   showScreen('guesscode');
   gcRender();
   if (GC.phase === 'finished') {
+    clearInterval(GC.timerInterval);
+    document.getElementById('gc-timer-bar-wrap').style.display = 'none';
     if (!S._gcResultShown) {
       S._gcResultShown = true;
-      setTimeout(() => gcShowResult(GC.winner), 300);
+      setTimeout(() => gcShowResult(GC.winner), 8000);
     }
   } else {
     S._gcResultShown = false;
+    gcStartTimer();
   }
 }
 

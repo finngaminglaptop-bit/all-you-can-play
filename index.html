@@ -3091,9 +3091,26 @@ function gcStartTimer() {
     bar.style.width = pct + '%';
     bar.className = 'timer-bar' + (pct < 30 ? ' danger' : pct < 60 ? ' warning' : '');
     if (remaining <= 0) {
-      clearInterval(GC.timerInterval);
-      if (GC.opponent === 'online') netGcSkipTurn(GC.turnStartedAt);
-      else gcAutoSkipTurn();
+      if (GC.opponent === 'online') {
+        // Only the player whose turn it actually is should end their own turn.
+        // If both clients raced to do this off their own observation time, whichever
+        // device found out about the turn *first* would always win and cut the other
+        // player's turn short — usually the person still waiting to guess, exactly
+        // backwards from what should happen. The non-active client still shows the
+        // countdown for awareness, but only nudges things along as a stall fallback
+        // (e.g. the active player's tab is gone) after a generous multiple of the
+        // real limit, not the instant its own clock reaches zero.
+        if (GC.currentPlayer === NET.seat) {
+          clearInterval(GC.timerInterval);
+          netGcSkipTurn(GC.turnStartedAt);
+        } else if (elapsed > GC.timeLimit * 3) {
+          clearInterval(GC.timerInterval);
+          netGcSkipTurn(GC.turnStartedAt);
+        }
+      } else {
+        clearInterval(GC.timerInterval);
+        gcAutoSkipTurn();
+      }
     }
   };
   tick();

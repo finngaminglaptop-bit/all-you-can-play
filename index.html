@@ -3091,19 +3091,15 @@ function gcStartTimer() {
     bar.style.width = pct + '%';
     bar.className = 'timer-bar' + (pct < 30 ? ' danger' : pct < 60 ? ' warning' : '');
     if (remaining <= 0) {
+      // Online: only the player whose turn it actually is may end their own
+      // turn. Letting the waiting player's client also race to do this (even
+      // as a "stall fallback" after a longer delay) reopens the exact bug this
+      // was meant to fix — whoever's client independently decides "time's up"
+      // is deciding it based on when *that device* found out, not on how much
+      // time the active player actually had. Full stop: no one but the active
+      // player's own client ever calls the skip in online mode.
       if (GC.opponent === 'online') {
-        // Only the player whose turn it actually is should end their own turn.
-        // If both clients raced to do this off their own observation time, whichever
-        // device found out about the turn *first* would always win and cut the other
-        // player's turn short — usually the person still waiting to guess, exactly
-        // backwards from what should happen. The non-active client still shows the
-        // countdown for awareness, but only nudges things along as a stall fallback
-        // (e.g. the active player's tab is gone) after a generous multiple of the
-        // real limit, not the instant its own clock reaches zero.
         if (GC.currentPlayer === NET.seat) {
-          clearInterval(GC.timerInterval);
-          netGcSkipTurn(GC.turnStartedAt);
-        } else if (elapsed > GC.timeLimit * 3) {
           clearInterval(GC.timerInterval);
           netGcSkipTurn(GC.turnStartedAt);
         }

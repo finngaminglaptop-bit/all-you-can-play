@@ -424,6 +424,49 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 .dice-history-row:last-child{border:none}
 .dice-breakdown{font-size:11px;color:rgba(240,238,255,0.3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
 
+/* ── COUNTDOWN TIMER ── */
+.cd-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+@media(max-width:680px){.cd-layout{grid-template-columns:1fr}}
+.cd-display-wrap{background:#0a0a10;border:2px solid rgba(124,111,247,0.18);border-radius:20px;
+  padding:36px 24px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.cd-round-label{font-family:var(--mono);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--accent);min-height:16px;text-align:center}
+.cd-digits{font-family:var(--mono);font-size:64px;font-weight:700;color:var(--text);letter-spacing:0.02em;
+  transition:color 0.2s}
+.cd-digits.warning{color:#f97316}
+.cd-digits.danger{color:#ef4444}
+.cd-digits.done{animation:cdPulse 0.6s ease 3}
+@keyframes cdPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.cd-bar-wrap{width:100%;height:8px;background:var(--card2);border-radius:5px;overflow:hidden}
+.cd-bar{height:100%;background:var(--accent);border-radius:5px;transition:width 1s linear,background 0.3s}
+.cd-bar.warning{background:#f97316}
+.cd-bar.danger{background:#ef4444}
+.cd-controls-row{display:flex;gap:10px;width:100%}
+.cd-btn{flex:1;padding:13px;border-radius:12px;border:none;font-family:var(--font);
+  font-size:14px;font-weight:700;cursor:pointer;transition:background 0.15s,transform 0.1s}
+.cd-btn:active{transform:scale(0.96)}
+.cd-btn-primary{background:var(--accent);color:#fff;box-shadow:0 0 20px var(--accent-g)}
+.cd-btn-primary:hover{background:#8f84fa}
+.cd-btn-secondary{background:var(--card2);color:var(--text);border:1px solid var(--border-h)}
+.cd-btn-secondary:hover{background:rgba(255,255,255,0.08)}
+.cd-btn:disabled{opacity:0.4;cursor:not-allowed}
+.cd-duration-row{display:flex;gap:7px;flex-wrap:wrap}
+.cd-duration-btn{padding:8px 13px;border-radius:9px;border:1px solid var(--border-h);
+  background:var(--card2);color:var(--muted);font-family:var(--mono);font-size:13px;font-weight:700;
+  cursor:pointer;transition:background 0.12s,color 0.12s,border-color 0.12s}
+.cd-duration-btn:hover,.cd-duration-btn.active{background:rgba(124,111,247,0.18);color:var(--accent);border-color:rgba(124,111,247,0.4)}
+.cd-custom-row{display:flex;align-items:center;gap:8px;margin-top:10px}
+.cd-custom-input{width:60px;background:var(--card2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;color:var(--text);font-family:var(--mono);font-size:14px;text-align:center;outline:none}
+.cd-custom-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-g)}
+.cd-rounds-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.cd-round-row{display:flex;align-items:center;gap:8px;background:var(--card2);
+  border:1px solid var(--border);border-radius:8px;padding:8px 10px;transition:border-color 0.15s,background 0.15s}
+.cd-round-row.current{border-color:var(--accent);background:rgba(124,111,247,0.1)}
+.cd-round-num{font-family:var(--mono);font-size:11px;color:var(--muted);width:18px;flex-shrink:0}
+.cd-round-text{flex:1;font-size:13px;background:transparent;border:none;color:var(--text);
+  font-family:var(--font);outline:none;min-width:0}
+
 /* ANIMS */
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideIn{from{opacity:0;transform:translateX(-22px)}to{opacity:1;transform:translateX(0)}}
@@ -435,7 +478,7 @@ canvas#wheelCanvas{border-radius:50%;display:block}
 </head>
 <body>
 <div class="grid-bg"></div>
-<div class="app-version">Version 1</div>
+<div class="app-version">Version 2</div>
 
 <!-- ═══ INTRO ═══ -->
 <div id="screen-intro" class="screen active">
@@ -1128,11 +1171,10 @@ canvas#wheelCanvas{border-radius:50%;display:block}
         <p class="tool-name">Dice Roller</p>
         <p class="tool-desc">Roll any number of dice with custom sides.</p>
       </div>
-      <div class="tool-card anim-in" style="animation-delay:.22s;--card-glow:rgba(124,111,247,0.1);opacity:0.45;cursor:not-allowed">
+      <div class="tool-card anim-in" style="animation-delay:.22s;--card-glow:rgba(124,111,247,0.1)" onclick="showScreen('countdown')">
         <span class="tool-icon">⏱</span>
         <p class="tool-name">Countdown Timer</p>
         <p class="tool-desc">Set a timer for turns, breaks, or challenges.</p>
-        <span class="card-badge badge-soon" style="position:absolute;top:11px;right:11px">Soon</span>
       </div>
       <div class="tool-card anim-in" style="animation-delay:.28s;--card-glow:rgba(247,111,168,0.1);opacity:0.45;cursor:not-allowed">
         <span class="tool-icon">🃏</span>
@@ -1387,6 +1429,7 @@ function showScreen(id) {
   if (id === 'wheel') requestAnimationFrame(drawWheel);
   if (id === 'hangman') hmInitKeyboard();
   if (id === 'dice') { diceUpdateDisplay(); diceRenderHistory(); }
+  if (id === 'countdown') cdRender();
 }
 
 function hmInitKeyboard() {
@@ -3393,6 +3436,165 @@ function gcApplyRemote(room) {
 }
 
 // ═══════════════════════════════════════════
+//  COUNTDOWN TIMER
+// ═══════════════════════════════════════════
+let CD = {
+  duration: 60, rounds: [], currentRound: 0,
+  timeLeft: 60, running: false, interval: null, advanceTimeout: null
+};
+
+function cdFormatTime(totalSec) {
+  const m = Math.floor(totalSec / 60), s = totalSec % 60;
+  return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+}
+
+function cdRoundsActive() {
+  const toggle = document.getElementById('cd-rounds-toggle');
+  return !!(toggle && toggle.checked && CD.rounds.length > 0);
+}
+
+function cdSetDuration(sec, btn) {
+  CD.duration = sec;
+  document.querySelectorAll('#cd-duration-row .cd-duration-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  if (!CD.running) { CD.timeLeft = sec; cdRender(); }
+}
+
+function cdApplyCustomDuration() {
+  const m = parseInt(document.getElementById('cd-custom-min').value || '0', 10);
+  const s = parseInt(document.getElementById('cd-custom-sec').value || '0', 10);
+  const total = m * 60 + s;
+  if (total <= 0) return;
+  document.querySelectorAll('#cd-duration-row .cd-duration-btn').forEach(b => b.classList.remove('active'));
+  cdSetDuration(total, null);
+}
+
+function cdAddRound() {
+  const input = document.getElementById('cd-round-add-input');
+  const val = input.value.trim();
+  if (!val) return;
+  CD.rounds.push(val);
+  input.value = '';
+  cdRender();
+}
+
+function cdRemoveRound(i) {
+  CD.rounds.splice(i, 1);
+  if (CD.currentRound >= CD.rounds.length) CD.currentRound = Math.max(0, CD.rounds.length - 1);
+  cdRender();
+}
+
+function cdRenameRound(i, val) {
+  const v = val.trim();
+  if (v) CD.rounds[i] = v;
+  cdRender();
+}
+
+function cdToggleStart() {
+  if (CD.running) cdPause();
+  else cdStart();
+}
+
+function cdStart() {
+  if (CD.timeLeft <= 0) CD.timeLeft = CD.duration;
+  CD.running = true;
+  clearInterval(CD.interval);
+  CD.interval = setInterval(cdTick, 1000);
+  cdRender();
+}
+
+function cdPause() {
+  CD.running = false;
+  clearInterval(CD.interval);
+  clearTimeout(CD.advanceTimeout);
+  cdRender();
+}
+
+function cdReset() {
+  CD.running = false;
+  clearInterval(CD.interval);
+  clearTimeout(CD.advanceTimeout);
+  CD.timeLeft = CD.duration;
+  CD.currentRound = 0;
+  const digitsEl = document.getElementById('cd-digits');
+  if (digitsEl) digitsEl.classList.remove('done');
+  cdRender();
+}
+
+function cdSkip() {
+  if (!cdRoundsActive()) return;
+  clearTimeout(CD.advanceTimeout);
+  CD.currentRound = (CD.currentRound + 1) % CD.rounds.length;
+  CD.timeLeft = CD.duration;
+  const digitsEl = document.getElementById('cd-digits');
+  if (digitsEl) digitsEl.classList.remove('done');
+  cdRender();
+}
+
+function cdTick() {
+  CD.timeLeft--;
+  if (CD.timeLeft <= 0) {
+    CD.timeLeft = 0;
+    cdRender();
+    const digitsEl = document.getElementById('cd-digits');
+    digitsEl.classList.add('done');
+    setTimeout(() => digitsEl.classList.remove('done'), 1800);
+    const autoAdvance = document.getElementById('cd-autoadvance-toggle').checked;
+    if (cdRoundsActive() && autoAdvance) {
+      clearInterval(CD.interval);
+      CD.advanceTimeout = setTimeout(() => {
+        if (!CD.running) return; // paused/reset during the pause between rounds
+        CD.currentRound = (CD.currentRound + 1) % CD.rounds.length;
+        CD.timeLeft = CD.duration;
+        cdRender();
+        CD.interval = setInterval(cdTick, 1000);
+      }, 1200);
+    } else {
+      CD.running = false;
+      clearInterval(CD.interval);
+    }
+    return;
+  }
+  cdRender();
+}
+
+function renderCdRoundsList() {
+  const el = document.getElementById('cd-rounds-list');
+  if (!el) return;
+  if (!CD.rounds.length) { el.innerHTML = '<p class="hint">No rounds added — timer will just run once.</p>'; return; }
+  const active = cdRoundsActive();
+  el.innerHTML = CD.rounds.map((r, i) => `
+    <div class="cd-round-row ${i === CD.currentRound && active ? 'current' : ''}">
+      <span class="cd-round-num">${i + 1}.</span>
+      <input class="cd-round-text" value="${r.replace(/"/g, '&quot;')}" onchange="cdRenameRound(${i}, this.value)"/>
+      <button class="wheel-item-del" onclick="cdRemoveRound(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function cdRender() {
+  const roundsToggle = document.getElementById('cd-rounds-toggle');
+  if (!roundsToggle) return; // screen not yet in DOM ready state
+  const active = cdRoundsActive();
+  document.getElementById('cd-round-label').textContent = active
+    ? `Round ${CD.currentRound + 1} of ${CD.rounds.length} — ${CD.rounds[CD.currentRound]}`
+    : '';
+  document.getElementById('cd-digits').textContent = cdFormatTime(CD.timeLeft);
+  const pct = CD.duration > 0 ? (CD.timeLeft / CD.duration) * 100 : 0;
+  const bar = document.getElementById('cd-bar');
+  const digitsEl = document.getElementById('cd-digits');
+  bar.style.width = pct + '%';
+  bar.classList.toggle('danger', pct < 20);
+  bar.classList.toggle('warning', pct >= 20 && pct < 50);
+  digitsEl.classList.toggle('danger', pct < 20);
+  digitsEl.classList.toggle('warning', pct >= 20 && pct < 50);
+  document.getElementById('cd-start-btn').textContent = CD.running ? 'Pause' : (CD.timeLeft > 0 && CD.timeLeft < CD.duration ? 'Resume' : 'Start');
+  document.getElementById('cd-skip-btn').disabled = !active;
+  document.getElementById('cd-rounds-block').style.display = roundsToggle.checked ? '' : 'none';
+  renderCdRoundsList();
+}
+
+// ═══════════════════════════════════════════
 //  DICE ROLLER
 // ═══════════════════════════════════════════
 let DICE = { sides: 6, count: 2, rolling: false, history: [], lastRolls: [] };
@@ -3576,6 +3778,71 @@ showScreen = function(id) {
         <div style="display:none;gap:10px;margin-top:4px" id="hm-online-actions">
           <button class="btn-create" style="flex:1;display:none" id="hm-next-round-btn" onclick="netHmNextRound()">Next round →</button>
           <button class="btn-cancel" style="flex:1" onclick="confirmQuit()">Leave room</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ COUNTDOWN TIMER ═══ -->
+<div id="screen-countdown" class="screen">
+  <nav class="nav">
+    <span class="nav-logo" onclick="goHome()">All-you-can-Play</span>
+    <button class="nav-back" onclick="showScreen('tools')">← Back to tools</button>
+  </nav>
+  <div class="inner" style="max-width:860px">
+    <h2 class="page-title anim-in">⏱ Countdown Timer</h2>
+    <p class="page-sub anim-in" style="animation-delay:.06s">Set a duration, optionally name each round, and start.</p>
+    <div class="cd-layout anim-in" style="animation-delay:.1s">
+      <div class="cd-display-wrap">
+        <p class="cd-round-label" id="cd-round-label"></p>
+        <div class="cd-digits" id="cd-digits">01:00</div>
+        <div class="cd-bar-wrap"><div class="cd-bar" id="cd-bar" style="width:100%"></div></div>
+        <div class="cd-controls-row">
+          <button class="cd-btn cd-btn-primary" id="cd-start-btn" onclick="cdToggleStart()">Start</button>
+          <button class="cd-btn cd-btn-secondary" onclick="cdReset()">Reset</button>
+        </div>
+        <div class="cd-controls-row">
+          <button class="cd-btn cd-btn-secondary" id="cd-skip-btn" onclick="cdSkip()" disabled>Skip to next round →</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div class="settings-block" style="padding:18px">
+          <p class="block-title">Duration per round</p>
+          <div class="cd-duration-row" id="cd-duration-row">
+            <button class="cd-duration-btn" onclick="cdSetDuration(15,this)">15s</button>
+            <button class="cd-duration-btn" onclick="cdSetDuration(30,this)">30s</button>
+            <button class="cd-duration-btn active" onclick="cdSetDuration(60,this)">1m</button>
+            <button class="cd-duration-btn" onclick="cdSetDuration(120,this)">2m</button>
+            <button class="cd-duration-btn" onclick="cdSetDuration(300,this)">5m</button>
+          </div>
+          <div class="cd-custom-row">
+            <span class="hint">Custom:</span>
+            <input class="cd-custom-input" id="cd-custom-min" type="text" inputmode="numeric" maxlength="3" placeholder="mm"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+            <span class="hint">:</span>
+            <input class="cd-custom-input" id="cd-custom-sec" type="text" inputmode="numeric" maxlength="2" placeholder="ss"
+              oninput="this.value=this.value.replace(/[^0-9]/g,'')"/>
+            <button class="wheel-add-btn" onclick="cdApplyCustomDuration()">Set</button>
+          </div>
+        </div>
+        <div class="settings-block" style="padding:18px">
+          <div class="toggle-row" style="margin-bottom:14px">
+            <div><p class="toggle-label">Named rounds</p><p class="toggle-sub">Cycle through a list — e.g. whose turn it is</p></div>
+            <label class="toggle"><input type="checkbox" id="cd-rounds-toggle" onchange="cdRender()"><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+          </div>
+          <div id="cd-rounds-block">
+            <div class="cd-rounds-list" id="cd-rounds-list"></div>
+            <div class="wheel-add-row" style="margin-top:10px">
+              <input class="wheel-add-input" id="cd-round-add-input" placeholder="e.g. Alice's turn…" maxlength="40"
+                onkeydown="if(event.key==='Enter') cdAddRound()"/>
+              <button class="wheel-add-btn" onclick="cdAddRound()">Add</button>
+            </div>
+            <div class="toggle-row" style="margin-top:14px">
+              <div><p class="toggle-sub" style="color:var(--text);font-size:13px">Auto-advance when time runs out</p></div>
+              <label class="toggle"><input type="checkbox" id="cd-autoadvance-toggle" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -38,7 +38,11 @@ Firestore database (see "Online multiplayer" below).
   - **Spin the Wheel** — add custom items/names and spin for a random pick,
     with spin history.
   - **Dice Roller** — roll any number of dice with custom side counts.
-  - Countdown Timer and Card Draw are planned ("Soon").
+  - **Countdown Timer** — preset or custom mm:ss duration, with an optional
+    "named rounds" list (e.g. "Alice's turn", "Bob's turn") that the timer
+    cycles through, auto-advancing to the next name when time runs out
+    (toggleable) and looping back to the start after the last one.
+  - Card Draw is planned ("Soon").
 
 ## Online multiplayer
 
